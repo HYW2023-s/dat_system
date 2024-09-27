@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap 表格示例</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-4">
+    <h3 class="text-center"><strong>批量用户上传</strong></h3>
+    <h6 class="text-center">请下载批量用户上传的excel模板，将信息填入后，上传填入数据后的文件。</h6>
+    <div class="text-center" style="margin-top: 10px">
+        <button type="button" class="btn btn-primary" id="downloadbutton">模板下载</button>
+    </div>
+    <div style="margin-top: 20px">
+        <h6><strong>模板解释：</strong></h6>
+        <h6>1.username字段为用户名，建议输入学生学号<strong>（必填）</strong></h6>
+        <h6>2.password字段为账户密码，建议全部填为123456<strong>（必填）</strong></h6>
+        <h6>3.name字段为学生姓名<strong>（必填）</strong></h6>
+        <h6>4.email字段为学生邮箱<strong>（非必填）</strong></h6>
+    </div>
+    <div class="text-center" style="margin-top: 20px">
+        <h6 class="text-center"><strong>请选择文件后，再点击下方【文件上传】按钮上传文件</strong></h6>
+        <div class="form-group text-center" style="margin-top: 30px">
+            {#            <label for="fileInput">Choose File</label>#}
+            <input type="file" class="form-control-file" id="fileInput">
+        </div>
+        <button type="button" class="btn btn-primary" id="uploadButton" style="margin-top: 20px">文件上传</button>
+    </div>
+</div>
+
+<script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script type="text/javascript">
+    $(function () {
+        download();
+        sendexcel();
+    })
+
+
+    function download() {
+        $('#downloadbutton').click(function () {
+            var a = document.createElement('a');
+            a.href = '/static/excel/user.xlsx';
+            a.download = 'user.xlsx';
+            a.click();
+        })
+    };
+
+    function sendexcel() {
+        $('#uploadButton').click(function () {
+            var file = $('#fileInput')[0].files[0];
+            var formData = new FormData();
+            formData.append('file', file);
+
+            $.ajax({
+                url: '/uploaduser/',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    console.log(data);
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            })
+        })
+    };
+</script>
+</body>
+</html>

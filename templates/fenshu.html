@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap 表格示例</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+
+    <div class="container mt-4">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">时间</th>
+                    <th scope="col">分数</th>
+                    <th scope="col">答题内容</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 假设这里有三条数据 -->
+                <tr>
+                    <td>1</td>
+                    <td>2023-01-01 10:00:00</td>
+                    <td>90</td>
+                    <td>
+                        <a href="#view-answer-1" class="btn btn-primary" role="button" data-bs-toggle="modal" data-bs-target="#answerModal1">查看</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>2023-01-02 11:00:00</td>
+                    <td>85</td>
+                    <td>
+                        <a href="#view-answer-2" class="btn btn-primary" role="button" data-bs-toggle="modal" data-bs-target="#answerModal2">查看</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>2023-01-03 12:00:00</td>
+                    <td>95</td>
+                    <td>
+                        <a href="#view-answer-3" class="btn btn-primary" role="button" data-bs-toggle="modal" data-bs-target="#answerModal3">查看</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 三个模态框示例，用于显示答题内容 -->
+        <div class="modal fade" id="answerModal1" tabindex="-1" aria-labelledby="answerModalLabel1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="answerModalLabel1">答题内容 1</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        这是答题内容示例1
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 仿照上面的例子，添加两个额外的模态框 #answerModal2 和 #answerModal3 -->
+
+    </div>
+
+    <!-- 引入Bootstrap JS（需要放在body标签的最后） -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<a>第一个</a>
+    <div>
+
+        <form method="post">
+        {% csrf_token %}
+            {% for field in form %}
+                <label>{{ field.label }}:{{ field }}</label>
+
+            {% endfor %}
+        <button type="submit">提交</button>
+        </form>
+    </div>
+</body>
+</html>

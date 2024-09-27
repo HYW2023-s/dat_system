@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap 表格示例</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h3 class="text-center"><strong>发散性思维能力测验</strong></h3>
+    <h4><strong>一、创造性思维介绍</strong></h4>
+    <h6 style="line-height:1.7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;创造性思维通常被认为是高级的认知功能之一，并被认为是儿童参与当代社会和经济的关键21世纪技能(Ananiadou & Claro, 2009)。对儿童来说，创造性思维可以是在学习过程中做出新颖和有意义的个人解释(Booton et al, 2021)，例如儿童的独立思考，为什么冥王星应该被认为是一颗行星，或者是参与日常生活中的创造性活动，例如画画或思考一个笑话(Kaufman & Beghetto, 2009)。儿童的创造性思维已经有这几种方式进行评估(Plucker & Makel, 2010)，包括发散性思维测试(Guilford, 1967)，收敛性思维测试(Mednick, 1962)，洞察力任务(Duncker & Lees, 1945)和创意产品的评估(Amabile, 1982)。在这些评估方式当中，最常用的是发散性思维测试(Plucker & Makel, 2010)。
+    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;发散性思维是创造性思维的主要的心理组成部分(Brophy, 2001; Guilford 1967)，发散性思维的培养对于激发学生的想象力和创新能力有重要意义，因此已有不少研究在探索学生的发散性思维，例如Booton等人(2021)探究了双语能力对发散性思维的影响，Rubenstein等人(2022)探究了发散性思维与小学生学习之间的关系，运用了Torrance(1966)开发的the Torrance Test of Creative Thinking-Figural(TTCF-F)来进行发散性思维的测试。目前也有不少测量学生的发散性思维的方法，其中最常用的是Guilford(1950)提出的the Alternative Uses Task，通过让被试者产生物体的用途来衡量被试者的发散性思维能力；在Guilford的工作基础上，Torrance(1966)开发了the Torrance Test of Creative Thinking-Figural来衡量发散性思维能力；Mednick(1962)提出了the Remote Associates Test (RAT)任务来衡量发散性思维，需要被试者回答3个提示词下的联想词汇用于评估。近年来又有不少研究基于这些传统的发散性思维测试，提出了新的方法，例如Gianotti等人(2001)在the Remote Associates Test (RAT)任务的基础上，提出了the Bridge-the-Associative-Gap Task(BAG)任务; Silvia等人(2009)提出一种通过快照评分的方法来衡量大学生的发散性思维能力。
+    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;这些发散性思维测量方法存在不少问题，例如评分不客观(Clark & Mirels, 1970; Hocevar & Michael ,1979; Silvia, 2015)以及评分费时费力(Acar & Runco, 2014)。针对这些问题，有研究人员开始使用计算机算法来评估参与者的发散性思维能力，计算机算法不仅能够解决评分不客观问题，并且能够减少评分的成本与时间(Olson et al, 2021)。
+    </h6>
+    <p class="text-center"></p>
+    <h4><strong>二、发散性思维测验介绍</strong></h4>
+    <h6 style="line-height:1.7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Olson等人(2021)提出的the Divergent Association Task(DAT)任务当中，参与者被要求在4分钟内给出10个在语义和用法上完全不相关十个名词， 通过自然语言处理模型GloVe模型计算词语之间的语义距离，最终得到的平均分即为参与者的发散性思维得分。The Divergent Association Task当中用于计算语义距离的模型为GloVe模型，GloVe模型是一种用于学习词向量表示的模型 (Pennington et al, 2014)，GloVe模型的设计目标是将每个词表示为一个向量，这些向量可以捕捉到单词之间的语义特性，其基本方法首先基于语料库构建的词汇共现矩阵，然后将词汇之间的关系转换为向量运算，GloVe模型通过检查每个词周围词的共现窗口，针对性的计算词与词之间的相关性，这使得GloVe模型能够更好地理解和处理语言的语义，量化几何空间中两个单词或短语之间的语义关系。Olson等人(2021)之所以使用Glove模型计算语义距离，是因为该模型以前曾用于对AUT任务进行评分(Beaty & Johnson, 2021; Dumas et al, 2021)，Dumas等人(2021)认为使用GloVe 840B进行的评分非常接近人类评分，能够可靠并且有效地推理发散性思维。
+    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本系统引用并改编了the Divergent Association Task(Olson et al,2021)来测量6到12岁年龄段儿童的发散性思维能力，DAT任务要求被试者提供10个在意思和用法上完全不相同的词语，再通过GloVe模型对10个词进行语义距离的计算，再通过一定的算法得到被试者的发散性思维得分。相比于传统的发散性思维测量方法，DAT任务更加简单，被试者仅需填写10个词语完成作答，计算机算法即可在短时间内找到被试者的发散性思维能力情况。
+    </h6>
+</div>
+
+<div class="container mt-4">
+    <a href="/index" class="btn btn-primary text-center" role="button" style="text-align: center"> 开始测试 </a>
+</div>
+</body>
+</html>

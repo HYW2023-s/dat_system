@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap 表格示例</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h3 class="text-center"><strong>数据分析结果</strong></h3>
+    <h4><strong>一、描述性数据统计</strong></h4>
+    <table class="table">
+        <caption> 基本描述性数据统计，此处数据为全部用户的数据统计</caption>
+
+        <thead>
+        <tr>
+            <th>最高分</th>
+            <th>最低分</th>
+            <th>平均分</th>
+            <th>中位数</th>
+            <th>极差</th>
+            <th>方差</th>
+            <th>标准差</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr>
+            <td>{{ max }}</td>
+            <td>{{ min }}</td>
+            <td>{{ avg }}</td>
+            <td>{{ media }}</td>
+            <td>{{ ptp }}</td>
+            <td>{{ var }}</td>
+            <td>{{ std }}</td>
+        </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<div class="container mt-4">
+    <div class="col-sm-8">
+        <div class="panel panel-default">
+            <h4><strong>二、柱状图分析</strong></h4>
+            <div class="panel-body text-center">
+                <div id="pic1" style="width: 150%;height: 600px"></div>
+
+            </div>
+            <h6>此处为每个分数段出现的人数</h6>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="col-sm-8">
+        <div class="panel panel-default">
+            <h4><strong>三、箱型图分析</strong></h4>
+            <div class="panel-body text-center">
+                <div id="pic2" style="width: 150%;height: 600px"></div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- 引入Bootstrap JS（需要放在body标签的最后） -->
+<script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/echarts.js' %}"></script>
+<script type="text/javascript">
+    $(function () {
+        mycharts();
+    })
+
+    function mycharts() {
+        var mychart1 = echarts.init(document.getElementById('pic1'));
+        var mychart2 = echarts.init(document.getElementById('pic2'));
+        $.ajax({
+            url: '/dataAnalysis/',
+            type: 'POST',
+            dataType: "JSON",
+            success: function (data) {
+                console.log(data);
+                var baroption = data.bar;
+                var boxplotoption = data.boxplot;
+                mychart1.setOption(baroption);
+                mychart2.setOption(boxplotoption);
+
+            }
+        })
+    };
+</script>
+
+</body>
+</html>

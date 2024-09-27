@@ -1,0 +1,243 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>独立文本框及小号提交按钮示例</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <style>
+        #hidden-content {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <h3 class="text-center"><strong>发散性思维测试</strong></h3>
+    <p></p>
+    <h4><strong> 任务介绍： </strong></h4>
+    <h6>这是一项对创造力的考验，请根据下面的规则，在作答框中输入10个在意思上和用法上尽可能不相同的名词。</h6>
+    <p></p>
+    <h4><strong> 任务要求： </strong></h4>
+    <p></p>
+    <h6> 1. 在每个作答框里只可以写一个词语。 </h6>
+    <h6> 2. 请注意，您回答的每个词汇都必须是名词。</h6>
+    <h6> 3. 不允许回答专有名词，例如：特定的人名、地名。</h6>
+    <h6> 4. 不允许使用专业词汇，专业术语。</h6>
+    <h6> 5. 请不要通过观察周围环境来获得灵感。</h6>
+    <h6> 6. 请在<strong style="color: red">{{ time }}</strong>秒内完成题目的测试，若超时，[提交]按钮将会消失。</h6>
+</div>
+
+<div class="container mt-4">
+    <h6 class="text-center"> 若您了解规则后，请点击【开始测试】按钮 </h6>
+    <p></p>
+    <div class="text-center">
+        <button class="btn btn-primary" id="starttest"> 开始测试</button>
+    </div>
+</div>
+
+<div class="container mt-4" id="hidden-content">
+    <h4 class="text-center"><strong> 目前已用时间 </strong></h4>
+    <div class="form-group">
+
+        <div class="col-12">
+            <p id="elapsed-time" class="form-control-plaintext text-center"></p>
+        </div>
+
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="inputText1" class="form-label">词1</label>
+            <input type="text" class="form-control" id="inputText1" placeholder="请输入内容...">
+            <label for="inputText1" class="form-label">词2</label>
+            <input type="text" class="form-control" id="inputText2" placeholder="请输入内容...">
+            <label for="inputText1" class="form-label">词3</label>
+            <input type="text" class="form-control" id="inputText3" placeholder="请输入内容...">
+            <label for="inputText1" class="form-label">词4</label>
+            <input type="text" class="form-control" id="inputText4" placeholder="请输入内容...">
+            <label for="inputText1" class="form-label">词5</label>
+            <input type="text" class="form-control" id="inputText5" placeholder="请输入内容...">
+            <label for="inputText1" class="form-label">词6</label>
+            <input type="text" class="form-control" id="inputText6" placeholder="请输入内容...">
+            <label for="inputText1" class="form-label">词7</label>
+            <input type="text" class="form-control" id="inputText7" placeholder="请输入内容...">
+            <label for="inputText1" class="form-label">词8</label>
+            <input type="text" class="form-control" id="inputText8" placeholder="请输入内容...">
+            <label for="inputText1" class="form-label">词9</label>
+            <input type="text" class="form-control" id="inputText9" placeholder="请输入内容...">
+            <label for="inputText1" class="form-label">词10</label>
+            <input type="text" class="form-control" id="inputText10" placeholder="请输入内容...">
+        </div>
+        <!-- 小号提交按钮 -->
+        <p></p>
+        <div class="text-center">
+            <button type="button" class="btn btn-primary" id="sendDataButton">提 交</button>
+        </div>
+    </form>
+</div>
+
+{#模态框,用于加载渲染数据#}
+<div class="modal fade" id="answerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="exampleModalLabel">分数查看</h3>
+
+            </div>
+            <div class="modal-body">
+                <p class="text-center" id="waiting">请等待一下测验结果,请勿提前关闭页面.</p>
+                <p class="lead" style="display: none" id="1">您的得分为:<strong id="dat_score"></strong></p>
+                <p class="lead" style="display: none" id="2">您已经超越全国<strong id="percentage"></strong>%的人</p>
+                <p class="lead" style="display: none" id="4">您的作答图为：</p>
+                <p id="pic_path" style="display: none"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="closebutton">关闭</button>
+                {#                    <button type="button" class="btn btn-primary">Save changes</button>#}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 引入Bootstrap JS（需要放在body标签的最后） -->
+<script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script type="text/javascript">
+    var startTime;
+    $(function () {
+        showtest();
+        setInterval(updatetime, 1000);
+        sendtime();
+        limitedtime();
+        closemodal();
+        checkInterval;
+    })
+
+    {#拿到限制时间#}
+    var limitedTime;
+
+    function showtest() {
+        $("#starttest").click(function () {
+            $('#hidden-content').toggle();
+            $('#starttest').toggle();
+            startTime = performance.now();
+        })
+    };
+
+    var elapsedTime;
+
+    function updatetime() {
+        var currentTime = performance.now(); // 获取当前时间戳
+        elapsedTime = (currentTime - startTime) / 1000; // 计算经过的时间（单位为秒）
+
+        // 将经过的时间转换为分钟和秒
+        var minutes = Math.floor(elapsedTime / 60);
+        var seconds = Math.floor(elapsedTime % 60);
+        {#console.log(elapsedTime);#}
+        // 更新页面上的时间显示
+        $('#elapsed-time').text(minutes + 'min:' + seconds + 's');
+    };
+
+
+    function sendtime() {
+        $("#sendDataButton").click(function () {
+            {#alert("提交成功，请稍后在 [结果查询] 中查询得分情况。");#}
+            $('#answerModal').modal('show');
+            var word1 = $('#inputText1').val();
+            var word2 = $('#inputText2').val();
+            var word3 = $('#inputText3').val();
+            var word4 = $('#inputText4').val();
+            var word5 = $('#inputText5').val();
+            var word6 = $('#inputText6').val();
+            var word7 = $('#inputText7').val();
+            var word8 = $('#inputText8').val();
+            var word9 = $('#inputText9').val();
+            var word10 = $('#inputText10').val();
+            $.ajax({
+                url: '/index/',
+                type: 'POST',
+                dataType: "JSON",
+                data: {
+                    spendtime: elapsedTime,
+                    starttime: startTime,
+                    word1: word1,
+                    word2: word2,
+                    word3: word3,
+                    word4: word4,
+                    word5: word5,
+                    word6: word6,
+                    word7: word7,
+                    word8: word8,
+                    word9: word9,
+                    word10: word10,
+                    limitedTime:limitedTime,
+                },
+
+                success: function (data) {
+                    console.log(data);
+                    var dat_score = data.dat_score;
+                    var pic_path = data.filepath;
+                    var per= data.per;
+
+                    {#$('#answerModal1').show();#}
+                    $('#answerModal #dat_score').html(dat_score);
+                    $('#answerModal #percentage').html(per);
+                    console.log(pic_path);
+
+                    $('#answerModal #pic_path').html('<img width="480" height="400" src="' + pic_path + '"/>');
+
+                    {#显示标签#}
+                    $('#1').toggle();
+                    $('#2').toggle();
+                    $('#4').toggle();
+                    $('#pic_path').toggle();
+                    $('#waiting').toggle();
+                }
+            });
+        })
+    };
+
+
+
+    function limitedtime() {
+        $("#starttest").click(function () {
+            $.ajax({
+                url: '/limitedtime/',
+                type: 'GET',
+                success: function (data) {
+                    limitedTime = data.limited_time;
+                },
+            })
+        })
+    };
+
+    var checkInterval;
+
+    {#判断限制时间#}
+
+    function judge() {
+        if (elapsedTime > limitedTime) {
+            clearInterval(checkInterval);
+            $('#sendDataButton').toggle();
+        }
+
+    };
+
+    {#保证1s1次的检测#}
+    checkInterval = setInterval(judge, 1000);
+
+
+    function closemodal() {
+        $("#closebutton").click(function () {
+            $('#answerModal').modal('hide');
+        })
+    };
+</script>
+
+
+</body>
+</html>
