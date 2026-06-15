@@ -140,6 +140,10 @@ dat admin --help
 
 ## Features
 
+### Language Switching
+
+The interface supports Chinese / English. Click the `EN` / `中文` button in the top-right corner to switch.
+
 ### DAT Test
 
 1. **Enter words**: Enter 10 nouns that are as unrelated to each other as possible, within the time limit (default 4 minutes)
@@ -160,12 +164,12 @@ Multiple embedding models are supported and can be switched in the admin panel:
 | Model | Dimension | Type | Notes |
 |-------|-----------|------|-------|
 | Tencent Word2Vec | 200 | Local | Default model, no network needed |
-| Aliyun text-embedding-v4 | 1024 | API | Requires API Key |
 | OpenAI text-embedding-3-small | 1536 | API | Requires API Key |
 | OpenAI text-embedding-3-large | 3072 | API | Requires API Key |
-| SiliconFlow BGE-large-zh | 1024 | API | Requires API Key |
+| SiliconFlow BGE-large-zh-v1.5 | 1024 | API | Requires API Key |
 | SiliconFlow Qwen3-Embedding-4B | 2560 | API | Requires API Key |
-| **Custom** | Any | API | OpenAI-compatible endpoints |
+| Aliyun text-embedding-v4 | 1024 | API | Requires API Key |
+| **Custom Model** | Any | API | Any OpenAI-compatible endpoint |
 
 Vectors fetched via API are **automatically cached** in the local database. The same word is never requested twice.
 

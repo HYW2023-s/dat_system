@@ -10,6 +10,12 @@ data/dat.db
 
 # Generated images
 frontend/assets/img/thescoreis*.jpg
+frontend/assets/img/heatmap_*.png
+frontend/assets/img/heatmap_*.jpg
+
+# Data exports and SQL dumps
+*.sql
+export/
 
 # IDE
 .vscode/

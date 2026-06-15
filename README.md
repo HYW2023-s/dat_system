@@ -165,6 +165,10 @@ dat admin --help            # 查看子命令
 
 ## 功能说明
 
+### 语言切换
+
+系统支持中文 / English 切换，右上角点击 `EN` / `中文` 按钮即可切换界面语言。
+
 ### DAT 发散性思维测试
 
 1. **输入词汇**：在限定时间（默认 4 分钟）内输入 10 个尽可能不相关的名词
@@ -185,7 +189,12 @@ dat admin --help            # 查看子命令
 | 模型 | 维度 | 运行方式 | 说明 |
 |------|------|----------|------|
 | Tencent Word2Vec | 200 | 本地 | 默认模型，无需网络 |
+| OpenAI text-embedding-3-small | 1536 | API | 需提供 API Key |
+| OpenAI text-embedding-3-large | 3072 | API | 需提供 API Key |
+| 硅基流动 BGE-large-zh-v1.5 | 1024 | API | 需提供 API Key |
+| 硅基流动 Qwen3-Embedding-4B | 2560 | API | 需提供 API Key |
 | 阿里百炼 text-embedding-v4 | 1024 | API | 需提供 API Key |
+| **自定义模型** | 任意 | API | OpenAI 兼容格式即可 |
 
 切换模型后，通过 API 获取的词向量会**自动缓存**到本地数据库，相同词语不会重复请求。
 
