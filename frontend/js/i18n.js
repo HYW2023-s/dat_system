@@ -94,14 +94,14 @@
     "DAT is based on the Associative Theory of Creativity: people who can connect semantically distant concepts tend to have stronger divergent thinking. The system uses NLP models (Word2Vec) to convert words into vectors and compute cosine distances — greater distance indicates more divergent thinking.");
   B("intro.steps.title", "操作步骤", "Steps");
   B("intro.step1.title", "进入测试", "Start the Test");
-  B("intro.step1.desc", "点击"开始测试"，系统开始计时", "Click \"Test\" to begin. The timer starts immediately.");
+  B("intro.step1.desc", "点击「开始测试」，系统开始计时", "Click \"Test\" to begin. The timer starts immediately.");
   B("intro.step2.title", "输入10个名词", "Enter 10 Nouns");
   B("intro.step2.desc", "在规定时间内，输入10个尽可能互不相关的名词", "Enter 10 nouns that are as unrelated to each other as possible.");
   B("intro.step3.title", "查看结果", "View Results");
   B("intro.step3.desc", "提交后查看 DAT 得分和语义距离热力图", "After submission, view your DAT score and semantic distance heatmap.");
   B("intro.tips.title", "小提示", "Tips");
   B("intro.tips.1", "请确保输入的都是名词", "Make sure all entries are nouns");
-  B("intro.tips.2", "词汇差异越大越好（如"河流"和"电脑"），避免同类词（如"苹果"和"香蕉"）",
+  B("intro.tips.2", "词汇差异越大越好（如「河流」和「电脑」），避免同类词（如「苹果」和「香蕉」）",
     "Greater difference is better (e.g. \"river\" and \"computer\"), avoid similar words (e.g. \"apple\" and \"banana\")");
   B("intro.tips.3", "不在词库中的词汇会被自动跳过，不影响总分", "Words not in the vocabulary are skipped automatically");
   B("intro.tips.4", "至少需要 5 个有效词汇才能生成热力图", "At least 5 valid words needed for heatmap generation");
@@ -121,7 +121,7 @@
   B("test.pretest_time_prefix", "请在", "Please enter 10 unrelated nouns within ");
   B("test.pretest_time_suffix", " 内输入 10个互不相关的名词", "");
   B("test.pretest_time_suffix_en", "", " minutes");
-  B("test.pretest_tip1", "词汇之间的差异越大越好。例如："大海"和"数学"的距离很远，"苹果"和"香蕉"的距离很近。",
+  B("test.pretest_tip1", "词汇之间的差异越大越好。例如：「大海」和「数学」的距离很远，「苹果」和「香蕉」的距离很近。",
     "The more different the words, the better. E.g. \"ocean\" and \"math\" are far apart, \"apple\" and \"banana\" are close.");
   B("test.pretest_tip2", "请确保输入的是名词，不是动词或形容词。", "Make sure to enter nouns, not verbs or adjectives.");
   B("test.pretest_tip3", "系统会过滤无效词汇，至少需要 5个有效词 才能生成热力图。",
