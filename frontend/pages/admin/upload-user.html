@@ -10,99 +10,41 @@
 </head>
 <body>
   <nav id="navbar" class="navbar"></nav>
-
-  <div class="page-container" style="padding-top:2rem;padding-bottom:3rem;max-width:700px;margin:0 auto">
-    <a href="/admin" class="btn btn-ghost mb-4" style="padding:0.5rem 0.75rem">
-      <i class="ph ph-arrow-left"></i> 返回管理
-    </a>
-
-    <h1 style="margin-bottom:2rem"><i class="ph ph-upload"></i> 批量上传用户</h1>
-
-    <div class="card mb-8">
+  <div class="page-container" style="padding-top:2rem;padding-bottom:3rem;max-width:600px;margin:0 auto">
+    <a href="/admin" class="btn btn-ghost mb-4" style="padding:0.375rem 0.625rem"><i class="ph ph-arrow-left"></i> 返回</a>
+    <h1 style="margin-bottom:1.5rem">批量上传用户</h1>
+    <div class="card mb-4">
       <h2 class="card-header">上传 Excel 文件</h2>
-
-      <div class="alert alert-info mb-4">
-        <strong>格式要求：</strong>Excel 文件 (.xlsx 或 .xls)，必须包含 <code>username</code> 和 <code>password</code> 两列
-      </div>
-
+      <div class="alert alert-info mb-4">Excel 文件需包含 <code>username</code> 和 <code>password</code> 列。</div>
       <form id="uploadForm">
-        <div class="form-group">
-          <label class="form-label">选择文件</label>
-          <input type="file" id="fileInput" class="form-input" accept=".xlsx,.xls" required>
-        </div>
-
+        <div class="form-group"><label class="form-label">选择文件</label><input type="file" id="fileInput" class="form-input" accept=".xlsx,.xls" required></div>
         <div id="uploadError" class="alert alert-error" style="display:none"></div>
         <div id="uploadSuccess" class="alert alert-success" style="display:none"></div>
-
-        <button type="submit" class="btn btn-primary">
-          <i class="ph ph-upload"></i> 上传并导入
-        </button>
+        <button type="submit" class="btn btn-primary">上传导入</button>
       </form>
     </div>
-
     <div class="card">
       <h2 class="card-header">模板示例</h2>
-      <div class="table-container" style="max-width:400px">
-        <table>
-          <thead>
-            <tr><th>username</th><th>password</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>student01</td><td>123456</td></tr>
-            <tr><td>student02</td><td>123456</td></tr>
-            <tr><td>student03</td><td>123456</td></tr>
-          </tbody>
-        </table>
+      <div class="table-container" style="max-width:320px">
+        <table><thead><tr><th>username</th><th>password</th></tr></thead><tbody><tr><td>student01</td><td>123456</td></tr><tr><td>student02</td><td>123456</td></tr></tbody></table>
       </div>
     </div>
   </div>
-
   <script>
     if (!requireAdmin()) {}
-
     renderNavbar("admin");
-
-    document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+    document.getElementById("uploadForm").addEventListener("submit",async(e)=>{
       e.preventDefault();
-      const fileInput = document.getElementById("fileInput");
-      const errorEl = document.getElementById("uploadError");
-      const successEl = document.getElementById("uploadSuccess");
-
-      if (!fileInput.files[0]) {
-        errorEl.textContent = "请选择文件";
-        errorEl.style.display = "block";
-        return;
-      }
-
-      errorEl.style.display = "none";
-      successEl.style.display = "none";
-
-      try {
-        const formData = new FormData();
-        formData.append("file", fileInput.files[0]);
-
-        const token = getToken();
-        const response = await fetch("/api/admin/upload-users", {
-          method: "POST",
-          headers: { "Authorization": `Bearer ${token}` },
-          body: formData,
-        });
-
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.detail || "Upload failed");
-
-        successEl.innerHTML = `
-          <i class="ph ph-check-circle"></i> ${result.message}
-          ${result.skipped && result.skipped.length > 0
-            ? `<br><small class="text-muted">跳过的用户：${result.skipped.join(", ")}</small>`
-            : ""}
-        `;
-        successEl.style.display = "block";
-        fileInput.value = "";
-      } catch (err) {
-        errorEl.textContent = err.message || "上传失败";
-        errorEl.style.display = "block";
-      }
+      const file=document.getElementById("fileInput").files[0],err=document.getElementById("uploadError"),ok=document.getElementById("uploadSuccess");
+      if(!file){err.textContent="请选择文件";err.style.display="block";return;}
+      err.style.display="none";ok.style.display="none";
+      try{
+        const fd=new FormData();fd.append("file",file);
+        const r=await fetch("/api/admin/upload-users",{method:"POST",headers:{"Authorization":`Bearer ${getToken()}`},body:fd});
+        const d=await r.json();if(!r.ok)throw new Error(d.detail||"上传失败");
+        ok.innerHTML=`<i class="ph ph-check-circle"></i> ${d.message}${d.skipped?.length?`<br><small>跳过：${d.skipped.join(", ")}</small>`:""}`;
+        ok.style.display="block";document.getElementById("fileInput").value="";
+      }catch(ex){err.textContent=ex.message;err.style.display="block";}
     });
   </script>
 </body>

@@ -12,90 +12,67 @@
 <body>
   <nav id="navbar" class="navbar"></nav>
 
-  <div class="page-container" style="padding-top:2rem;padding-bottom:3rem">
-    <!-- Pre-test state -->
-    <div id="pretest">
-      <div class="card" style="text-align:center;max-width:600px;margin:2rem auto">
-        <div style="font-size:3rem;color:var(--accent);margin-bottom:1rem">
-          <i class="ph ph-timer"></i>
+  <div class="page-container" style="padding-top:2.5rem;padding-bottom:3rem">
+    <!-- Pre-test -->
+    <div id="pretest" style="max-width:520px;margin:0 auto">
+      <div style="text-align:center;margin-bottom:2rem">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;background:var(--accent-light);border-radius:12px;margin-bottom:0.75rem">
+          <i class="ph ph-timer" style="font-size:1.5rem;color:var(--accent)"></i>
         </div>
-        <h1 style="font-size:1.5rem;margin-bottom:0.5rem">DAT 发散性思维测试</h1>
-        <p class="text-muted mb-4">
-          请在 <strong id="pretestTime">4分钟</strong> 内输入<strong>10个互不相关的名词</strong>
-        </p>
-        <div class="alert alert-info" style="text-align:left;margin-bottom:1.5rem">
-          <i class="ph ph-info"></i> 提示：词汇差异越大越好。请确保输入的是名词，不要输入动词或形容词。
-        </div>
-        <button class="btn btn-primary" onclick="startTest()" style="font-size:1rem;padding:0.75rem 2.5rem">
-          <i class="ph ph-play"></i> 开始作答
-        </button>
+        <h1 style="font-size:1.5rem;margin-bottom:0.25rem">发散性思维测试</h1>
+        <p class="text-muted">请在 <strong id="pretestTime">4分钟</strong> 内输入 <strong>10个互不相关的名词</strong></p>
       </div>
+
+      <div class="card" style="margin-bottom:1.5rem">
+        <div style="display:flex;align-items:flex-start;gap:0.75rem">
+          <i class="ph ph-info" style="color:var(--accent);margin-top:0.125rem"></i>
+          <div style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6">
+            <p>词汇之间的<strong>差异越大越好</strong>。例如："大海"和"数学"的距离很远，"苹果"和"香蕉"的距离很近。</p>
+            <p class="mt-2">请确保输入的是<strong>名词</strong>，不是动词或形容词。</p>
+            <p class="mt-2">系统会过滤无效词汇，至少需要 <strong>5个有效词</strong> 才能生成热力图。</p>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="startTest()" style="width:100%;padding:0.75rem;font-size:1rem">
+        开始作答
+      </button>
     </div>
 
-    <!-- Test state -->
-    <div id="testArea" style="display:none">
+    <!-- Test -->
+    <div id="testArea" style="display:none;max-width:640px;margin:0 auto">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem">
-        <h1 style="font-size:1.25rem">请输入10个互不相关的名词</h1>
-        <div>
-          <span class="text-muted text-sm">剩余时间：</span>
-          <span id="timer" class="timer"></span>
+        <h1 style="font-size:1.25rem">请输入 10 个互不相关的名词</h1>
+        <div style="text-align:right">
+          <div class="text-sm text-muted">剩余时间</div>
+          <div id="timer" class="timer"></div>
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;max-width:800px;margin:0 auto">
-        <script>
-          for (let i = 1; i <= 10; i++) {
-            document.write(`
-              <div class="form-group" style="margin-bottom:0">
-                <label class="form-label">词 ${i}</label>
-                <input type="text" id="word${i}" class="form-input" placeholder="请输入名词..." maxlength="32">
-              </div>
-            `);
-          }
-        </script>
-      </div>
-
-      <div id="testError" class="alert alert-error" style="display:none;margin-top:1rem;max-width:800px;margin-left:auto;margin-right:auto"></div>
-
-      <div style="text-align:center;margin-top:2rem">
-        <button class="btn btn-primary" onclick="submitTest()" style="font-size:1rem;padding:0.75rem 2.5rem">
-          <i class="ph ph-check-circle"></i> 提交答案
-        </button>
-      </div>
-    </div>
-
-    <!-- Result state -->
-    <div id="resultArea" style="display:none;max-width:800px;margin:0 auto">
-      <div class="card" style="text-align:center;margin-bottom:2rem">
-        <div class="score-label">DAT 得分</div>
-        <div id="scoreDisplay" class="score-display" style="margin:0.5rem 0">-</div>
-        <p class="text-muted text-sm">
-          有效词汇数：<strong id="effectiveNum">0</strong> 个 &nbsp;|&nbsp;
-          超越了 <strong id="percentage">0</strong>% 的用户
-        </p>
-      </div>
-
-      <div class="card" style="text-align:center">
-        <h2 class="card-header" style="display:flex;align-items:center;justify-content:center;gap:0.5rem">
-          <i class="ph ph-chart-scatter" style="color:var(--accent)"></i> 语义距离热力图
-        </h2>
-        <div id="heatmapContainer">
-          <img id="heatmapImage" class="heatmap-image" alt="语义距离热力图" style="margin-top:1rem">
+      <div class="card">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <script>
+            for (let i = 1; i <= 10; i++) {
+              document.write(`
+                <div class="form-group">
+                  <label class="form-label">${i}</label>
+                  <input type="text" id="word${i}" class="form-input" placeholder="输入名词..." maxlength="32" autocomplete="off">
+                </div>
+              `);
+            }
+          </script>
         </div>
-        <p id="noHeatmap" class="text-muted text-sm mt-4" style="display:none">
-          有效词汇不足5个，无法生成热力图
-        </p>
       </div>
 
-      <div style="text-align:center;margin-top:2rem;display:flex;gap:1rem;justify-content:center">
-        <button class="btn btn-secondary" onclick="retryTest()">
-          <i class="ph ph-arrow-counter-clockwise"></i> 重新测试
-        </button>
-        <a href="/results" class="btn btn-ghost">
-          <i class="ph ph-list-numbers"></i> 查看历史记录
-        </a>
-      </div>
+      <div id="testError" class="alert alert-error" style="display:none;margin-top:1rem"></div>
+
+      <button class="btn btn-primary" onclick="submitTest()" style="width:100%;padding:0.75rem;margin-top:1.5rem;font-size:1rem">
+        提交答案
+      </button>
     </div>
+
+    <!-- Result -->
+    <div id="resultArea" style="display:none;max-width:700px;margin:0 auto"></div>
   </div>
 
   <script>
@@ -114,8 +91,7 @@
         timeLeft = limitedTime;
         const mins = Math.floor(limitedTime / 60);
         const secs = limitedTime % 60;
-        document.getElementById("pretestTime").textContent =
-          `${mins}分${secs > 0 ? secs + "秒" : ""}`;
+        document.getElementById("pretestTime").textContent = `${mins}分${secs > 0 ? secs + "秒" : ""}`;
       } catch (err) {
         showToast("获取配置失败", "error");
       }
@@ -132,16 +108,13 @@
     function updateTimer() {
       const elapsed = Math.floor((Date.now() - startTime) / 1000);
       timeLeft = limitedTime - elapsed;
-
       const timerEl = document.getElementById("timer");
       const mins = Math.floor(Math.max(0, timeLeft) / 60);
       const secs = Math.max(0, timeLeft) % 60;
       timerEl.textContent = `${mins}:${String(secs).padStart(2, "0")}`;
-
       timerEl.className = "timer";
       if (timeLeft <= 30) timerEl.classList.add("danger");
       else if (timeLeft <= 60) timerEl.classList.add("warning");
-
       if (timeLeft <= 0) {
         clearInterval(timerInterval);
         showToast("时间到，自动提交", "info");
@@ -151,192 +124,122 @@
 
     async function submitTest() {
       clearInterval(timerInterval);
-
       const words = {};
       let hasInput = false;
       for (let i = 1; i <= 10; i++) {
         words[`word${i}`] = document.getElementById(`word${i}`).value.trim();
         if (words[`word${i}`]) hasInput = true;
       }
-
       if (!hasInput) {
         document.getElementById("testError").textContent = "请至少输入一个词汇";
         document.getElementById("testError").style.display = "block";
         timerInterval = setInterval(updateTimer, 1000);
         return;
       }
-
       document.getElementById("testArea").style.display = "none";
       document.getElementById("pretest").style.display = "none";
-
       const resultDiv = document.getElementById("resultArea");
       resultDiv.style.display = "block";
-      resultDiv.innerHTML = `
-        <div style="text-align:center;padding:4rem">
-          <div class="spinner" style="margin:0 auto 1rem"></div>
-          <p class="text-muted">正在计算得分...</p>
-        </div>
-      `;
+      resultDiv.innerHTML = `<div style="text-align:center;padding:4rem"><div class="spinner" style="margin:0 auto 1rem"></div><p class="text-muted">正在计算得分...</p></div>`;
 
       try {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        const data = {
+        const result = await apiPost("/dat/calculate", {
           ...words,
           spend_time: String(elapsed),
           limited_time: String(limitedTime),
-        };
-
-        const result = await apiPost("/dat/calculate", data);
+        });
         displayResult(result);
       } catch (err) {
-        resultDiv.innerHTML = `
-          <div class="alert alert-error" style="text-align:center">
-            <p>计算失败：${err.message}</p>
-            <button class="btn btn-secondary mt-4" onclick="retryTest()">重新测试</button>
-          </div>
-        `;
+        resultDiv.innerHTML = `<div class="alert alert-error" style="text-align:center"><p>计算失败：${err.message}</p><button class="btn btn-secondary mt-4" onclick="retryTest()">重新测试</button></div>`;
       }
     }
 
     function displayResult(result) {
-      const scoreColor = result.dat_score > 60 ? 'var(--success)' :
-                        result.dat_score > 40 ? 'var(--accent)' : 'var(--warning)';
-
+      const scoreColor = result.dat_score > 60 ? 'var(--success)' : result.dat_score > 40 ? 'var(--accent)' : 'var(--warning)';
       document.getElementById("resultArea").innerHTML = `
-        <div class="card" style="text-align:center;margin-bottom:2rem">
+        <div class="card" style="text-align:center;margin-bottom:1.5rem">
           <div class="score-label">DAT 得分</div>
-          <div class="score-display" style="margin:0.5rem 0;color:${scoreColor}">${result.dat_score}</div>
-          <p class="text-muted text-sm">
-            有效词汇数：<strong>${result.effective_num}</strong> 个 &nbsp;|&nbsp;
-            超越了 <strong>${result.percentage}</strong>% 的用户
-            ${result.provider_name ? `&nbsp;|&nbsp; 模型：<strong>${result.provider_name}</strong>` : ''}
+          <div class="score-display" style="margin:0.25rem 0 0.5rem;color:${scoreColor}">${result.dat_score}</div>
+          <p class="text-sm text-muted">
+            有效词汇：<strong>${result.effective_num}</strong>/10 &nbsp;|&nbsp;
+            超越 <strong>${result.percentage}%</strong> 的用户
+            ${result.provider_name ? `&nbsp;|&nbsp; 模型：${result.provider_name}` : ''}
           </p>
         </div>
-
         <div class="card" style="text-align:center">
           <h2 class="card-header" style="display:flex;align-items:center;justify-content:center;gap:0.5rem">
             <i class="ph ph-chart-scatter" style="color:var(--accent)"></i> 语义距离热力图
           </h2>
+          <p class="text-sm text-muted mb-4">深红 = 距离近 &nbsp; 深蓝 = 距离远</p>
           <div id="heatmapResult"></div>
         </div>
-
-        <div style="text-align:center;margin-top:2rem;display:flex;gap:1rem;justify-content:center">
-          <button class="btn btn-secondary" onclick="retryTest()">
-            <i class="ph ph-arrow-counter-clockwise"></i> 重新测试
-          </button>
-          <a href="/results" class="btn btn-ghost">
-            <i class="ph ph-list-numbers"></i> 查看历史记录
-          </a>
+        <div style="text-align:center;margin-top:1.5rem;display:flex;gap:0.75rem;justify-content:center">
+          <button class="btn btn-secondary" onclick="retryTest()">重新测试</button>
+          <a href="/results" class="btn btn-ghost">查看历史记录</a>
         </div>
       `;
-
-      // Load ECharts heatmap data from latest record
       loadHeatmapForLatestResult();
     }
 
     async function loadHeatmapForLatestResult() {
       try {
-        // Fetch the latest result from the results list
         const resultsData = await apiGet("/dat/results?page=1&page_size=1");
         if (resultsData.items.length > 0) {
-          const latestId = resultsData.items[0].id;
-          const heatmapData = await apiGet(`/dat/result/${latestId}/heatmap-data`);
+          const heatmapData = await apiGet(`/dat/result/${resultsData.items[0].id}/heatmap-data`);
           if (heatmapData.words && heatmapData.words.length >= 2) {
             renderEChartsHeatmap(heatmapData);
             return;
           }
         }
-      } catch (e) {
-        console.log("ECharts heatmap fallback", e);
-      }
-      // Fallback: show nothing
-      document.getElementById("heatmapResult").innerHTML =
-        `<p class="text-muted text-sm mt-4">有效词汇不足，无法生成热力图</p>`;
+      } catch (e) {}
+      document.getElementById("heatmapResult").innerHTML = `<p class="text-muted text-sm mt-4">有效词汇不足，无法生成热力图</p>`;
     }
 
     function renderEChartsHeatmap(data) {
       const dom = document.getElementById("heatmapResult");
       if (!dom) return;
-
-      dom.innerHTML = `<div id="heatmapChart" style="width:100%;height:${Math.max(360, data.words.length * 55)}px;margin-top:0.5rem"></div>`;
-
-      const chartDom = document.getElementById("heatmapChart");
-      const chart = echarts.init(chartDom);
+      dom.innerHTML = `<div id="heatmapChart" style="width:100%;height:${Math.max(360, data.words.length * 55)}px"></div>`;
+      const chart = echarts.init(document.getElementById("heatmapChart"));
       const words = data.words;
-      const matrixData = data.matrix;
-
-      // Build symmetric data for ECharts
       const fullData = [];
-      for (const item of matrixData) {
+      for (const item of data.matrix) {
         fullData.push([item[0], item[1], item[2]]);
         fullData.push([item[1], item[0], item[2]]);
       }
-
       chart.setOption({
         tooltip: {
           position: "top",
-          formatter: (params) => {
-            return `<strong>${words[params.value[0]]}</strong> ↔ <strong>${words[params.value[1]]}</strong><br/>语义距离: <strong>${params.value[2]}</strong>`;
-          },
+          formatter: (p) => `<strong>${words[p.value[0]]}</strong> - <strong>${words[p.value[1]]}</strong><br/>语义距离: <strong>${p.value[2]}</strong>`,
         },
         grid: { left: "10%", right: "5%", top: "3%", bottom: "12%" },
         xAxis: {
-          type: "category",
-          data: words,
-          splitArea: { show: true },
-          axisLabel: { rotate: 30, fontSize: 12, fontWeight: "bold", color: "#52525b" },
+          type: "category", data: words, splitArea: { show: true },
+          axisLabel: { rotate: 25, fontSize: 13, fontWeight: "bold", color: "#6b5e4a" },
         },
         yAxis: {
-          type: "category",
-          data: words,
-          splitArea: { show: true },
-          axisLabel: { fontSize: 12, fontWeight: "bold", color: "#52525b" },
+          type: "category", data: words, splitArea: { show: true },
+          axisLabel: { fontSize: 13, fontWeight: "bold", color: "#6b5e4a" },
         },
         visualMap: {
-          min: 0,
-          max: 100,
-          calculable: true,
-          orient: "horizontal",
-          left: "center",
-          bottom: "1%",
-          inRange: {
-            color: [
-              "#a50026", "#d73027", "#f46d43", "#fdae61", "#fee090",
-              "#e0f3f8", "#abd9e9", "#74add1", "#4575b4", "#313695",
-            ],
-          },
-          text: ["远", "近"],
-          textStyle: { color: "#52525b" },
+          min: 0, max: 100, calculable: true, orient: "horizontal", left: "center", bottom: "1%",
+          inRange: { color: ["#a50026","#d73027","#f46d43","#fdae61","#fee090","#e0f3f8","#abd9e9","#74add1","#4575b4","#313695"] },
+          text: ["远", "近"], textStyle: { color: "#6b5e4a" },
         },
         series: [{
-          name: "语义距离",
-          type: "heatmap",
-          data: fullData,
+          name: "语义距离", type: "heatmap", data: fullData,
           label: {
-            show: true,
-            color: "#1a1a2e",
-            fontSize: 11,
-            fontWeight: "bold",
-            formatter: (p) => {
-              const v = p.value[2];
-              return v > 55 || v < 35 ? "" : String(Math.round(v));
-            },
+            show: true, color: "#2c2416", fontSize: 11, fontWeight: "bold",
+            formatter: (p) => { const v = p.value[2]; return v > 55 || v < 35 ? "" : String(Math.round(v)); },
           },
-          emphasis: {
-            itemStyle: { shadowBlur: 10, shadowColor: "rgba(0,0,0,0.3)" },
-          },
+          emphasis: { itemStyle: { shadowBlur: 8, shadowColor: "rgba(0,0,0,0.15)" } },
           itemStyle: { borderColor: "#ffffff", borderWidth: 2 },
         }],
       });
-
       window.addEventListener("resize", () => chart.resize());
     }
-    }
 
-    function retryTest() {
-      window.location.reload();
-    }
-
+    function retryTest() { window.location.reload(); }
     init();
   </script>
 </body>

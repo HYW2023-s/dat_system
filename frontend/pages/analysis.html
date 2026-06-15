@@ -11,94 +11,36 @@
 </head>
 <body>
   <nav id="navbar" class="navbar"></nav>
-
   <div class="page-container" style="padding-top:2rem;padding-bottom:3rem">
-    <h1 style="margin-bottom:2rem"><i class="ph ph-chart-bar"></i> 数据分析</h1>
-
-    <!-- Stats Cards -->
-    <div id="statsCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem"></div>
-
-    <!-- Charts -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
-      <div class="card">
-        <h2 class="card-header">得分分布</h2>
-        <div id="barChart" style="height:350px"></div>
-      </div>
-      <div class="card">
-        <h2 class="card-header">箱型图</h2>
-        <div id="boxChart" style="height:350px"></div>
-      </div>
+    <h1 style="margin-bottom:1.5rem">数据分析</h1>
+    <div id="statsCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;margin-bottom:2rem"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+      <div class="card"><h2 class="card-header">得分分布</h2><div id="barChart" style="height:320px"></div></div>
+      <div class="card"><h2 class="card-header">箱型图</h2><div id="boxChart" style="height:320px"></div></div>
     </div>
   </div>
 
   <script>
     if (!requireAdmin()) {}
-
     async function init() {
       renderNavbar("analysis");
-
       try {
         const data = await apiGet("/admin/analysis");
         renderStats(data.stats);
         renderCharts(data.distribution, data.boxplot_data);
-      } catch (err) {
-        document.querySelector(".page-container").innerHTML = `
-          <div class="alert alert-error">加载失败：${err.message}</div>
-        `;
-      }
+      } catch(e) { document.querySelector(".page-container").innerHTML=`<div class="alert alert-error">加载失败</div>`; }
     }
-
-    function renderStats(stats) {
-      const cards = [
-        { label: "样本数", value: stats.count, icon: "users" },
-        { label: "平均分", value: stats.avg, icon: "target" },
-        { label: "最高分", value: stats.max, icon: "arrow-up" },
-        { label: "最低分", value: stats.min, icon: "arrow-down" },
-        { label: "中位数", value: stats.median, icon: "stack" },
-        { label: "标准差", value: stats.std, icon: "waveform" },
-      ];
-
-      document.getElementById("statsCards").innerHTML = cards.map(c => `
-        <div class="card" style="text-align:center">
-          <div class="score-label">${c.label}</div>
-          <div style="font-size:1.75rem;font-weight:700;color:var(--text-primary);margin:0.25rem 0">${c.value}</div>
-        </div>
-      `).join("");
+    function renderStats(s) {
+      const cards=[{l:"样本数",v:s.count,i:"users"},{l:"平均分",v:s.avg,i:"target"},{l:"最高分",v:s.max},{l:"最低分",v:s.min},{l:"中位数",v:s.median},{l:"标准差",v:s.std}];
+      document.getElementById("statsCards").innerHTML=cards.map(c=>`<div class="card" style="text-align:center"><div class="score-label">${c.l}</div><div style="font-size:1.5rem;font-weight:700;color:var(--text-primary);margin:0.25rem 0">${c.v}</div></div>`).join("");
     }
-
-    function renderCharts(distribution, boxplotData) {
-      // Bar chart
-      const barDom = document.getElementById("barChart");
-      const barChart = echarts.init(barDom);
-      barChart.setOption({
-        tooltip: { trigger: "axis" },
-        grid: { left: "3%", right: "4%", bottom: "3%", containLabel: true },
-        xAxis: { type: "category", data: Object.keys(distribution) },
-        yAxis: { type: "value" },
-        series: [{ data: Object.values(distribution), type: "bar", itemStyle: { color: "#4f46e5" } }],
-      });
-
-      // Box chart
-      const boxDom = document.getElementById("boxChart");
-      const boxChart = echarts.init(boxDom);
-      boxChart.setOption({
-        tooltip: { trigger: "item" },
-        grid: { left: "3%", right: "4%", bottom: "3%", containLabel: true },
-        xAxis: { type: "category", data: ["DAT 得分"] },
-        yAxis: { type: "value", name: "Score" },
-        series: [{
-          type: "boxplot",
-          data: [boxplotData.scores],
-          itemStyle: { color: "#4f46e5" },
-        }],
-      });
-
-      window.addEventListener("resize", () => {
-        barChart.resize();
-        boxChart.resize();
-      });
+    function renderCharts(dist, box) {
+      const bar=echarts.init(document.getElementById("barChart"));
+      bar.setOption({tooltip:{trigger:"axis"},grid:{left:"3%",right:"4%",bottom:"3%",containLabel:true},xAxis:{type:"category",data:Object.keys(dist),axisLabel:{color:"#6b5e4a"}},yAxis:{type:"value"},series:[{data:Object.values(dist),type:"bar",itemStyle:{color:"#b8753e"}}]});
+      const boxChart=echarts.init(document.getElementById("boxChart"));
+      boxChart.setOption({tooltip:{trigger:"item"},grid:{left:"3%",right:"4%",bottom:"3%",containLabel:true},xAxis:{type:"category",data:["DAT得分"]},yAxis:{type:"value"},series:[{type:"boxplot",data:[box.scores],itemStyle:{color:"#b8753e"}}]});
+      window.addEventListener("resize",()=>{bar.resize();boxChart.resize();});
     }
-
     init();
   </script>
 </body>
