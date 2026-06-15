@@ -150,6 +150,7 @@
   B("results.title", "作答记录", "Test Records");
   B("results.new_test", "新建测试", "New Test");
   B("results.search_placeholder", "搜索用户名...", "Search username...");
+  B("results.search_btn", "搜索", "Search");
   B("results.th_id", "ID", "ID");
   B("results.th_username", "用户名", "Username");
   B("results.th_time", "时间", "Time");
