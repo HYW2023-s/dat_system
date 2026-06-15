@@ -242,6 +242,7 @@
   B("taskconfig.error_range", "时间范围 10-3600 秒", "Must be between 10 and 3600 seconds");
   B("taskconfig.saved", "已更新为", "Updated to ");
   B("taskconfig.seconds", "秒", " sec");
+  B("modelconfig.dim_unit", "维", "d");
 
   // ====== MODEL CONFIG ======
   B("modelconfig.title", "Embedding 模型配置", "Embedding Model Config");
