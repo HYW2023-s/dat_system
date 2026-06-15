@@ -44,15 +44,41 @@ pip install -r requirements.txt
 
 ### 4. 启动
 
+安装完成后，有两种方式启动系统：
+
+#### 方式一：使用 CLI 命令（推荐）
+
 ```bash
-# 启动 Web 服务（默认 http://localhost:8000）
+# 确保虚拟环境已激活（命令行前有 (.venv) 标识）
+# 如果没有，先执行：
+source .venv/bin/activate     # macOS / Linux
+# .venv\Scripts\activate      # Windows
+
+# 启动服务
+python cli.py start
+
+# 或者安装为系统命令后直接用 dat
+pip install -e .
 dat start
+```
 
-# 指定端口
-dat start --port 8080
+`pip install -e .` 会将 `dat` 命令注册到当前虚拟环境，之后在虚拟环境激活状态下可直接使用 `dat` 开头的所有命令，无需每次输入 `python cli.py`。
 
-# 生产模式部署
-dat deploy --port 80
+#### 方式二：直接启动
+
+```bash
+# 确保虚拟环境已激活
+source .venv/bin/activate
+
+# 直接使用 uvicorn 启动
+python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000
+```
+
+#### 指定端口
+
+```bash
+dat start --port 8080              # CLI 方式
+python -m uvicorn backend.main:app --port 8080   # 直接启动
 ```
 
 ### 5. 登录
@@ -69,24 +95,68 @@ dat deploy --port 80
 
 ## CLI 命令
 
+> **前提**：CLI 命令需要在虚拟环境激活状态下使用。  
+> 首次使用前建议执行 `pip install -e .` 注册 `dat` 命令，之后在终端输入 `dat` 即可。  
+> 如果没有注册，可以用 `python cli.py` 替代 `dat`，效果相同。
+
+### 启动服务
+
 ```bash
-# 启动服务
-dat start                                # 默认 http://localhost:8000
-dat start --port 8080                    # 指定端口
-dat start --host 0.0.0.0 --port 8080     # 指定 host 和端口
+# 默认启动（http://localhost:8000）
+dat start
 
-# 导出实验数据
-dat export                               # 默认导出 CSV
-dat export --format xlsx                 # 导出 Excel
-dat export --output ./export_data        # 指定输出目录
+# 指定端口
+dat start --port 8080
 
-# 重置密码
-dat admin reset-password                 # 重置为默认密码 123456
-dat admin reset-password --password 新密码 --username 用户名
+# 允许局域网内其他设备访问
+dat start --host 0.0.0.0 --port 8080
+```
 
-# 生产部署
-dat deploy                               # 部署到 80 端口
+启动后在浏览器打开 `http://localhost:8000` 即可使用。
+
+### 导出实验数据
+
+```bash
+# 导出为 CSV（默认格式），保存到 ./export 目录
+dat export
+
+# 导出为 Excel
+dat export --format xlsx
+
+# 指定输出目录
+dat export --output ~/Desktop/dat_data
+```
+
+导出文件包含所有用户的作答记录：ID、用户名、时间、10个词汇、DAT得分、有效词数、作答耗时。
+
+### 修改密码
+
+```bash
+# 重置管理员密码为默认值 123456
+dat admin reset-password
+
+# 重置指定用户的密码
+dat admin reset-password --username student01 --password 新密码
+```
+
+### 生产部署
+
+```bash
+# 部署到 80 端口（需要 root 权限）
+dat deploy
+
+# 部署到指定端口（非 1024 以下端口不需要 root）
 dat deploy --port 8080
+```
+
+生产模式与 `start` 的区别：绑定 `0.0.0.0`（允许外部访问），关闭访问日志，只输出警告级别日志。
+
+### 查看帮助
+
+```bash
+dat --help                  # 查看所有命令
+dat start --help            # 查看某个命令的选项
+dat admin --help            # 查看子命令
 ```
 
 ---
