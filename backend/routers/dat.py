@@ -79,7 +79,7 @@ async def calculate_dat(
     }
 
     # Compute DAT score
-    result = compute_dat_score(words_dict)
+    result = await compute_dat_score(words_dict)
 
     # Generate heatmap
     valid_words = result["valid_words"]
@@ -119,6 +119,7 @@ async def calculate_dat(
         "effective_num": result["effective_num"],
         "picture_path": pic_path,
         "percentage": percentage,
+        "provider_name": result.get("provider_name", "unknown"),
     }
 
 

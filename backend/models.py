@@ -8,6 +8,8 @@ from sqlalchemy import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.database import Base
+# EmbeddingCache is defined in services/vector_cache.py
+# It will be imported and registered when the service is loaded
 
 
 class User(Base):

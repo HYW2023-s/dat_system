@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from backend.config import STATIC_DIR, FONT_PATH
-from backend.services.embedding import get_word_vector
+from backend.services.embedding import get_active_provider
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +53,24 @@ def generate_heatmap(valid_words: list, dat_score: int) -> str:
     if n < 5:
         return "/assets/img/tips.jpg"
 
-    # Compute the lower-triangular distance matrix
-    # Build full matrix first then mask upper triangle
-    vectors = np.stack([get_word_vector(w) for w in valid_words])
+    # Get vectors - prefer Word2Vec for visualization (always available, no API cost)
+    from backend.services.embedding import get_provider
+    w2v = get_provider("word2vec")
+    if w2v is None:
+        logger.warning("Word2Vec provider not available for heatmap")
+        return "/assets/img/tips.jpg"
+
+    vectors = []
+    for w in valid_words:
+        # Use sync method for Word2Vec
+        v = w2v.model[w] if w2v.model and w in w2v.model else None
+        if v is not None:
+            vectors.append(v)
+        else:
+            # Word not in vocab - should not happen since we already filtered
+            return "/assets/img/tips.jpg"
+
+    vectors = np.stack(vectors)
     from sklearn.metrics.pairwise import cosine_similarity
     sim_matrix = cosine_similarity(vectors)
     dist_matrix = (1 - sim_matrix) * 100  # Scale to 0-100 like original

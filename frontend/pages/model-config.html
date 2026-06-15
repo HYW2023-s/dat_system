@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>模型配置 - DAT System</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <script src="/js/api.js"></script>
+</head>
+<body>
+  <nav id="navbar" class="navbar"></nav>
+
+  <div class="page-container" style="padding-top:2rem;padding-bottom:3rem;max-width:700px;margin:0 auto">
+    <a href="/admin" class="btn btn-ghost mb-4" style="padding:0.5rem 0.75rem">
+      <i class="ph ph-arrow-left"></i> 返回管理
+    </a>
+
+    <h1 style="margin-bottom:2rem"><i class="ph ph-cpu"></i> Embedding 模型配置</h1>
+
+    <!-- Current Model -->
+    <div class="card mb-4">
+      <h2 class="card-header" style="display:flex;align-items:center;gap:0.5rem">
+        <i class="ph ph-check-circle" style="color:var(--success)"></i> 当前模型
+      </h2>
+      <div id="currentModelInfo" style="display:flex;align-items:center;gap:1rem">
+        <div class="spinner"></div>
+        <span class="text-muted">加载中...</span>
+      </div>
+    </div>
+
+    <!-- Available Models -->
+    <div class="card mb-4">
+      <h2 class="card-header" style="display:flex;align-items:center;gap:0.5rem">
+        <i class="ph ph-stack" style="color:var(--accent)"></i> 可用模型
+      </h2>
+      <div id="modelsList">
+        <div class="spinner" style="margin:1rem auto"></div>
+      </div>
+    </div>
+
+    <!-- API Key Configuration -->
+    <div class="card mb-4">
+      <h2 class="card-header" style="display:flex;align-items:center;gap:0.5rem">
+        <i class="ph ph-key" style="color:var(--accent)"></i> API Key 配置
+      </h2>
+      <p class="text-sm text-muted mb-4">
+        对于需要调用外部 API 的模型，请提供您的 API Key。
+        API Key 仅存储在服务端 Session 中，断开连接后需要重新输入。
+      </p>
+
+      <div class="form-group">
+        <label class="form-label">模型</label>
+        <select id="apikeyModel" class="form-input">
+          <option value="ali-qwen-v4">阿里百炼 text-embedding-v4</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="apiKey">API Key</label>
+        <input type="password" id="apiKey" class="form-input" placeholder="输入您的 API Key" autocomplete="off">
+      </div>
+
+      <div id="apiKeyError" class="alert alert-error" style="display:none"></div>
+      <div id="apiKeySuccess" class="alert alert-success" style="display:none"></div>
+
+      <button class="btn btn-primary" onclick="saveApiKey()">
+        <i class="ph ph-floppy-disk"></i> 保存 API Key
+      </button>
+    </div>
+
+    <!-- Cache Info -->
+    <div class="card">
+      <h2 class="card-header" style="display:flex;align-items:center;gap:0.5rem">
+        <i class="ph ph-database" style="color:var(--accent)"></i> 向量缓存
+      </h2>
+      <p class="text-sm text-muted mb-4">
+        通过 API 获取的词向量会自动缓存到本地数据库。
+        同一词语不会被重复请求。
+      </p>
+      <div id="cacheStats">
+        <span class="text-muted text-sm">加载中...</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (!requireAdmin()) {}
+
+    async function init() {
+      renderNavbar("admin");
+      await loadModels();
+      await loadCacheStats();
+    }
+
+    async function loadModels() {
+      try {
+        const data = await apiGet("/models");
+        renderCurrentModel(data.active_model, data.models);
+        renderModelsList(data.models, data.active_model);
+      } catch (err) {
+        showToast("加载模型列表失败", "error");
+      }
+    }
+
+    function renderCurrentModel(activeName, models) {
+      const active = models.find(m => m.name === activeName);
+      if (!active) {
+        document.getElementById("currentModelInfo").innerHTML = `
+          <span class="text-muted">未选择</span>
+        `;
+        return;
+      }
+      document.getElementById("currentModelInfo").innerHTML = `
+        <div style="font-size:1.25rem;font-weight:700;color:var(--text-primary)">${active.description}</div>
+        <span style="background:var(--accent-light);color:var(--accent);padding:0.25rem 0.5rem;border-radius:var(--radius-sm);font-size:0.75rem;font-weight:500">${active.dimension}维</span>
+        <span style="background:${active.is_local ? '#ecfdf5' : '#fef3c7'};color:${active.is_local ? 'var(--success)' : 'var(--warning)'};padding:0.25rem 0.5rem;border-radius:var(--radius-sm);font-size:0.75rem;font-weight:500">
+          ${active.is_local ? '本地' : 'API'}
+        </span>
+      `;
+    }
+
+    function renderModelsList(models, activeName) {
+      document.getElementById("modelsList").innerHTML = models.map(m => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 0;border-bottom:1px solid var(--border)">
+          <div style="flex:1">
+            <div style="font-weight:600;color:var(--text-primary)">${m.description}</div>
+            <div class="text-sm text-muted mt-2">
+              <span style="margin-right:1rem"><i class="ph ph-ruler"></i> ${m.dimension}维</span>
+              <span style="margin-right:1rem"><i class="ph ph-${m.is_local ? 'hard-drives' : 'cloud'}"></i> ${m.is_local ? '本地运行' : 'API 调用'}</span>
+            </div>
+          </div>
+          ${m.name === activeName
+            ? `<span style="background:var(--accent-light);color:var(--accent);padding:0.5rem 1rem;border-radius:var(--radius-md);font-size:0.875rem;font-weight:500">
+                <i class="ph ph-check"></i> 当前使用
+              </span>`
+            : `<button class="btn btn-secondary" onclick="switchModel('${m.name}')" style="padding:0.375rem 0.75rem;font-size:0.8125rem">
+                <i class="ph ph-swap"></i> 切换
+              </button>`
+          }
+        </div>
+      `).join("");
+    }
+
+    async function switchModel(modelName) {
+      try {
+        const result = await apiPost("/models/switch", { model_name: modelName });
+        showToast(result.message, "success");
+        await loadModels();
+      } catch (err) {
+        showToast(err.message || "切换失败", "error");
+      }
+    }
+
+    async function saveApiKey() {
+      const modelName = document.getElementById("apikeyModel").value;
+      const apiKey = document.getElementById("apiKey").value.trim();
+      const errorEl = document.getElementById("apiKeyError");
+      const successEl = document.getElementById("apiKeySuccess");
+
+      if (!apiKey) {
+        errorEl.textContent = "请输入 API Key";
+        errorEl.style.display = "block";
+        successEl.style.display = "none";
+        return;
+      }
+
+      try {
+        errorEl.style.display = "none";
+        successEl.style.display = "none";
+        const result = await apiPost("/models/apikey", {
+          model_name: modelName,
+          api_key: apiKey,
+        });
+        successEl.textContent = result.message;
+        successEl.style.display = "block";
+        document.getElementById("apiKey").value = "";
+        await loadModels();
+      } catch (err) {
+        errorEl.textContent = err.message || "保存失败";
+        errorEl.style.display = "block";
+        successEl.style.display = "none";
+      }
+    }
+
+    async function loadCacheStats() {
+      try {
+        const stats = await apiGet("/models/cache-stats");
+        if (Object.keys(stats).length === 0) {
+          document.getElementById("cacheStats").innerHTML = `
+            <span class="text-muted text-sm">缓存为空（尚未通过 API 获取过词向量）</span>
+          `;
+          return;
+        }
+        document.getElementById("cacheStats").innerHTML = Object.entries(stats).map(([name, count]) => `
+          <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--border)">
+            <span>${name}</span>
+            <span><strong>${count}</strong> 个词向量已缓存</span>
+          </div>
+        `).join("");
+      } catch (err) {
+        document.getElementById("cacheStats").innerHTML = `
+          <span class="text-muted text-sm">无法获取缓存统计</span>
+        `;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

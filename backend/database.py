@@ -24,5 +24,7 @@ async def get_db() -> AsyncSession:
 
 async def init_db():
     """Create all tables on startup."""
+    # Import EmbeddingCache to register its table
+    from backend.services.vector_cache import EmbeddingCache  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

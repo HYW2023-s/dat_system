@@ -51,12 +51,13 @@ app.add_middleware(
 )
 
 # Include routers
-from backend.routers import auth, dat, admin, export
+from backend.routers import auth, dat, admin, export, models_api
 
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(dat.router, prefix="/api/dat", tags=["dat"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(export.router, prefix="/api/export", tags=["export"])
+app.include_router(models_api.router, prefix="/api/models", tags=["models"])
 
 # Mount static files for frontend
 frontend_path = Path(FRONTEND_DIR)
@@ -79,6 +80,7 @@ if frontend_path.exists():
         "admin": "pages/admin/dashboard.html",
         "admin/upload-user": "pages/admin/upload-user.html",
         "admin/task-config": "pages/admin/task-config.html",
+        "model-config": "pages/model-config.html",
     }
 
     @app.get("/{full_path:path}")
