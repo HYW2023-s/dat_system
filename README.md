@@ -2,7 +2,9 @@
 
 Divergent Association Task（发散性思维测试）系统 — 通过计算词汇之间的语义距离，客观测量发散性思维能力。
 
-基于论文 [Using the divergent association task to measure divergent thinking in Chinese elementary school students](https://doi.org/10.1016/j.tsc.2024.101503) (2024, *Thinking Skills and Creativity*) 开发。
+> 📄 **论文**：[Using the divergent association task to measure divergent thinking in Chinese elementary school students](https://doi.org/10.1016/j.tsc.2024.101503)  
+> Ding, G., He, Y., Yi, K., & Li, S. (2024). *Thinking Skills and Creativity, 52*, 101503.  
+> https://doi.org/10.1016/j.tsc.2024.101503
 
 ---
 
