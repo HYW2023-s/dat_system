@@ -1,39 +1,39 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>注册 - DAT System</title>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="register.title">注册 - DAT System</title>
   <link rel="stylesheet" href="/css/style.css">
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <script src="/js/i18n.js"></script>
 </head>
 <body style="background:var(--bg-page);min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:2rem">
   <div style="width:100%;max-width:380px">
     <div style="text-align:center;margin-bottom:2.5rem">
-      <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:var(--accent-light);border-radius:14px;margin-bottom:1rem">
-        <i class="ph ph-user-plus" style="font-size:1.75rem;color:var(--accent)"></i>
-      </div>
-      <h1 style="font-size:1.5rem;margin-bottom:0.25rem">注册账号</h1>
-      <p class="text-sm text-muted">创建 DAT System 账号</p>
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:var(--accent-light);border-radius:14px;margin-bottom:1rem"><i class="ph ph-user-plus" style="font-size:1.75rem;color:var(--accent)"></i></div>
+      <h1 style="font-size:1.5rem;margin-bottom:0.25rem" data-i18n="register.title">注册账号</h1>
+      <p class="text-sm text-muted" data-i18n="register.subtitle">创建 DAT System 账号</p>
     </div>
     <div class="card" style="padding:2rem">
       <form id="registerForm">
-        <div class="form-group"><label class="form-label" for="username">用户名</label><input type="text" id="username" class="form-input" placeholder="请输入用户名" required></div>
-        <div class="form-group"><label class="form-label" for="password">密码</label><input type="password" id="password" class="form-input" placeholder="至少6位字符" required minlength="6"></div>
-        <div class="form-group"><label class="form-label" for="confirmPassword">确认密码</label><input type="password" id="confirmPassword" class="form-input" placeholder="再次输入密码" required minlength="6"></div>
+        <div class="form-group"><label class="form-label" for="username" data-i18n="register.username">用户名</label><input type="text" id="username" class="form-input" required></div>
+        <div class="form-group"><label class="form-label" for="password" data-i18n="register.password">密码</label><input type="password" id="password" class="form-input" data-i18n-placeholder="register.password_placeholder" placeholder="至少6位字符" required minlength="6"></div>
+        <div class="form-group"><label class="form-label" for="confirmPassword" data-i18n="register.confirm_password">确认密码</label><input type="password" id="confirmPassword" class="form-input" data-i18n-placeholder="register.confirm_placeholder" placeholder="再次输入密码" required minlength="6"></div>
         <div id="errorMsg" class="alert alert-error" style="display:none"></div>
-        <button type="submit" class="btn btn-primary" style="width:100%;padding:0.625rem 0">注册</button>
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:0.625rem 0" data-i18n="register.submit">注册</button>
       </form>
-      <p class="text-center text-sm text-muted mt-4">已有账号？<a href="/login">返回登录</a></p>
+      <p class="text-center text-sm text-muted mt-4"><span data-i18n="register.has_account">已有账号？</span><a href="/login" data-i18n="register.login_link">返回登录</a></p>
     </div>
   </div>
   <script src="/js/api.js"></script>
   <script>
-    document.getElementById("registerForm").addEventListener("submit",async(e)=>{
+    applyI18n();
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const u=document.getElementById("username").value.trim(),p=document.getElementById("password").value,c=document.getElementById("confirmPassword").value,err=document.getElementById("errorMsg");
-      if(p!==c){err.textContent="两次输入密码不一致";err.style.display="block";return;}
-      try{err.style.display="none";await apiPost("/auth/register",{username:u,password:p,confirm_password:c});showToast("注册成功","success");setTimeout(()=>window.location.href="/login",1000);}catch(ex){err.textContent=ex.message||"注册失败";err.style.display="block";}
+      const u = document.getElementById("username").value.trim(), p = document.getElementById("password").value, c = document.getElementById("confirmPassword").value, err = document.getElementById("errorMsg");
+      if (p !== c) { err.textContent = t("register.error_mismatch"); err.style.display = "block"; return; }
+      try { err.style.display = "none"; await apiPost("/auth/register", { username: u, password: p, confirm_password: c }); showToast(t("register.success"), "success"); setTimeout(() => window.location.href = "/login", 1000); }
+      catch (ex) { err.textContent = t("register.error_failed"); err.style.display = "block"; }
     });
   </script>
 </body>

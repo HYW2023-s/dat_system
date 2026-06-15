@@ -1,94 +1,25 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>任务介绍 - DAT System</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
-  <script src="/js/api.js"></script>
-</head>
-<body>
-  <nav id="navbar" class="navbar"></nav>
-
-  <div class="page-container" style="padding-top:3rem;padding-bottom:4rem;max-width:720px;margin:0 auto">
-    <div style="text-align:center;margin-bottom:3rem">
-      <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:var(--accent-light);border-radius:14px;margin-bottom:1rem">
-        <i class="ph ph-brain" style="font-size:1.75rem;color:var(--accent)"></i>
-      </div>
-      <h1 style="font-size:1.75rem;margin-bottom:0.5rem">发散性关联任务（DAT）</h1>
-      <p class="text-muted" style="max-width:480px;margin:0 auto">通过计算词汇之间的语义距离，客观测量发散性思维水平</p>
-      <p class="mt-4" style="font-size:0.8125rem;color:var(--text-muted);line-height:1.6">
-        本系统基于论文：
-        <br><a href="https://doi.org/10.1016/j.tsc.2024.101503" target="_blank" rel="noopener">Ding, G., He, Y., Yi, K., & Li, S. (2024). <em>Thinking Skills and Creativity, 52</em>, 101503.</a>
-      </p>
-    </div>
-
-    <div class="card mb-4">
-      <div style="display:flex;align-items:flex-start;gap:0.75rem">
-        <i class="ph ph-book-open" style="font-size:1.25rem;color:var(--accent);margin-top:0.125rem;flex-shrink:0"></i>
-        <div>
-          <h2 style="font-size:1.0625rem;margin-bottom:0.5rem">什么是发散性思维</h2>
-          <p class="text-sm" style="line-height:1.7">
-            发散性思维是创造性思维的核心组成部分，指个体在面对开放性问题时，产生多种不同想法和解决方案的能力。与寻找唯一正确答案的聚合性思维不同，发散性思维强调思维的广度与灵活性。
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="card mb-4">
-      <div style="display:flex;align-items:flex-start;gap:0.75rem">
-        <i class="ph ph-ruler" style="font-size:1.25rem;color:var(--accent);margin-top:0.125rem;flex-shrink:0"></i>
-        <div>
-          <h2 style="font-size:1.0625rem;margin-bottom:0.5rem">测量原理</h2>
-          <p class="text-sm" style="line-height:1.7">
-            DAT 基于<strong>联想创造性理论</strong>：能够将语义距离较远的概念联系起来的人，往往具有更强的发散性思维能力。系统使用自然语言处理模型（Word2Vec）将词汇转换为向量，计算词汇之间的余弦距离，距离越远说明思维越具发散性。
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="card mb-4">
-      <h2 style="font-size:1.0625rem;margin-bottom:1rem">操作步骤</h2>
-      <div style="display:flex;flex-direction:column;gap:1rem">
-        <div style="display:flex;gap:0.75rem;align-items:flex-start">
-          <div style="background:var(--accent-light);color:var(--accent);border-radius:50%;width:1.75rem;height:1.75rem;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:0.875rem;flex-shrink:0">1</div>
-          <div><strong>进入测试</strong><p class="text-sm text-muted mt-2">点击"开始测试"，系统开始计时</p></div>
-        </div>
-        <div style="display:flex;gap:0.75rem;align-items:flex-start">
-          <div style="background:var(--accent-light);color:var(--accent);border-radius:50%;width:1.75rem;height:1.75rem;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:0.875rem;flex-shrink:0">2</div>
-          <div><strong>输入10个名词</strong><p class="text-sm text-muted mt-2">在规定时间内，输入10个尽可能互不相关的名词</p></div>
-        </div>
-        <div style="display:flex;gap:0.75rem;align-items:flex-start">
-          <div style="background:var(--accent-light);color:var(--accent);border-radius:50%;width:1.75rem;height:1.75rem;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:0.875rem;flex-shrink:0">3</div>
-          <div><strong>查看结果</strong><p class="text-sm text-muted mt-2">提交后查看 DAT 得分和语义距离热力图</p></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div style="display:flex;align-items:flex-start;gap:0.75rem">
-        <i class="ph ph-lightbulb" style="font-size:1.25rem;color:var(--accent);margin-top:0.125rem;flex-shrink:0"></i>
-        <div>
-          <h2 style="font-size:1.0625rem;margin-bottom:0.5rem">小提示</h2>
-          <ul style="font-size:0.875rem;color:var(--text-secondary);padding-left:1.25rem;display:flex;flex-direction:column;gap:0.375rem">
-            <li>请确保输入的都是 <strong>名词</strong></li>
-            <li>词汇差异越大越好（如"河流"和"电脑"），避免同类词（如"苹果"和"香蕉"）</li>
-            <li>不在词库中的词汇会被自动跳过，不影响总分</li>
-            <li>至少需要 5 个有效词汇才能生成热力图</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div style="text-align:center;margin-top:2.5rem">
-      <a href="/test" class="btn btn-primary" style="font-size:1rem;padding:0.75rem 2rem">开始测试</a>
-    </div>
-  </div>
-
-  <script>
-    if (!requireAuth()) {}
-    else { renderNavbar("introduction"); }
-  </script>
-</body>
-</html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title data-i18n="intro.title">任务介绍 - DAT System</title>
+<link rel="stylesheet" href="/css/style.css"><script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script><script src="/js/i18n.js"></script><script src="/js/api.js"></script></head>
+<body><nav id="navbar" class="navbar"></nav>
+<div class="page-container" style="padding-top:3rem;padding-bottom:4rem;max-width:720px;margin:0 auto">
+<div style="text-align:center;margin-bottom:3rem">
+<div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:var(--accent-light);border-radius:14px;margin-bottom:1rem"><i class="ph ph-brain" style="font-size:1.75rem;color:var(--accent)"></i></div>
+<h1 style="font-size:1.75rem;margin-bottom:0.5rem" data-i18n="intro.title">发散性关联任务（DAT）</h1>
+<p class="text-muted" style="max-width:480px;margin:0 auto" data-i18n="intro.desc">通过计算词汇之间的语义距离，客观测量发散性思维水平</p>
+<p class="mt-4" style="font-size:0.8125rem;color:var(--text-muted);line-height:1.6"><span data-i18n="intro.paper">本系统基于论文：</span><br><a href="https://doi.org/10.1016/j.tsc.2024.101503" target="_blank">Ding, G., He, Y., Yi, K., & Li, S. (2024). <em>Thinking Skills and Creativity, 52</em>, 101503.</a></p>
+</div>
+<div class="card mb-4"><div style="display:flex;align-items:flex-start;gap:0.75rem"><i class="ph ph-book-open" style="font-size:1.25rem;color:var(--accent);margin-top:0.125rem;flex-shrink:0"></i><div><h2 style="font-size:1.0625rem;margin-bottom:0.5rem" data-i18n="intro.what_is.title">什么是发散性思维</h2><p class="text-sm" style="line-height:1.7" data-i18n="intro.what_is.body">发散性思维是创造性思维的核心组成部分...</p></div></div></div>
+<div class="card mb-4"><div style="display:flex;align-items:flex-start;gap:0.75rem"><i class="ph ph-ruler" style="font-size:1.25rem;color:var(--accent);margin-top:0.125rem;flex-shrink:0"></i><div><h2 style="font-size:1.0625rem;margin-bottom:0.5rem" data-i18n="intro.principle.title">测量原理</h2><p class="text-sm" style="line-height:1.7" data-i18n="intro.principle.body">DAT 基于联想创造性理论...</p></div></div></div>
+<div class="card mb-4"><h2 style="font-size:1.0625rem;margin-bottom:1rem" data-i18n="intro.steps.title">操作步骤</h2>
+<div style="display:flex;flex-direction:column;gap:1rem">
+<div style="display:flex;gap:0.75rem;align-items:flex-start"><div style="background:var(--accent-light);color:var(--accent);border-radius:50%;width:1.75rem;height:1.75rem;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:0.875rem;flex-shrink:0">1</div><div><strong data-i18n="intro.step1.title">进入测试</strong><p class="text-sm text-muted mt-2" data-i18n="intro.step1.desc">点击"开始测试"，系统开始计时</p></div></div>
+<div style="display:flex;gap:0.75rem;align-items:flex-start"><div style="background:var(--accent-light);color:var(--accent);border-radius:50%;width:1.75rem;height:1.75rem;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:0.875rem;flex-shrink:0">2</div><div><strong data-i18n="intro.step2.title">输入10个名词</strong><p class="text-sm text-muted mt-2" data-i18n="intro.step2.desc">在规定时间内，输入10个尽可能互不相关的名词</p></div></div>
+<div style="display:flex;gap:0.75rem;align-items:flex-start"><div style="background:var(--accent-light);color:var(--accent);border-radius:50%;width:1.75rem;height:1.75rem;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:0.875rem;flex-shrink:0">3</div><div><strong data-i18n="intro.step3.title">查看结果</strong><p class="text-sm text-muted mt-2" data-i18n="intro.step3.desc">提交后查看 DAT 得分和语义距离热力图</p></div></div>
+</div></div>
+<div class="card"><div style="display:flex;align-items:flex-start;gap:0.75rem"><i class="ph ph-lightbulb" style="font-size:1.25rem;color:var(--accent);margin-top:0.125rem;flex-shrink:0"></i><div><h2 style="font-size:1.0625rem;margin-bottom:0.5rem" data-i18n="intro.tips.title">小提示</h2><ul style="font-size:0.875rem;color:var(--text-secondary);padding-left:1.25rem;display:flex;flex-direction:column;gap:0.375rem"><li data-i18n="intro.tips.1">请确保输入的都是名词</li><li data-i18n="intro.tips.2">词汇差异越大越好...</li><li data-i18n="intro.tips.3">不在词库中的词汇会被自动跳过...</li><li data-i18n="intro.tips.4">至少需要 5 个有效词汇才能生成热力图</li></ul></div></div></div>
+<div style="text-align:center;margin-top:2.5rem"><a href="/test" class="btn btn-primary" style="font-size:1rem;padding:0.75rem 2rem" data-i18n="intro.start_btn">开始测试</a></div>
+</div>
+<script>if(!requireAuth()){}else{renderNavbar("introduction");applyI18n();}</script>
+</body></html>

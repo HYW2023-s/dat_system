@@ -1,5 +1,7 @@
 # DAT System v2.0
 
+> 📖 [English version](README_EN.md)
+
 Divergent Association Task（发散性思维测试）系统 — 通过计算词汇之间的语义距离，客观测量发散性思维能力。
 
 > 📄 **论文**：[Using the divergent association task to measure divergent thinking in Chinese elementary school students](https://doi.org/10.1016/j.tsc.2024.101503)  

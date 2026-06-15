@@ -3,82 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>登录 - DAT System</title>
+  <title data-i18n="login.title">发散性思维测试 - DAT System</title>
   <link rel="stylesheet" href="/css/style.css">
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <script src="/js/i18n.js"></script>
 </head>
 <body style="background:var(--bg-page);min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:2rem">
   <div style="width:100%;max-width:380px">
-    <!-- Header -->
     <div style="text-align:center;margin-bottom:2.5rem">
       <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:var(--accent-light);border-radius:14px;margin-bottom:1rem">
         <i class="ph ph-brain" style="font-size:1.75rem;color:var(--accent)"></i>
       </div>
-      <h1 style="font-size:1.5rem;margin-bottom:0.25rem;color:var(--text-primary)">发散性思维测试</h1>
-      <p class="text-sm text-muted">Divergent Association Task</p>
+      <h1 style="font-size:1.5rem;margin-bottom:0.25rem;color:var(--text-primary)" data-i18n="login.title">发散性思维测试</h1>
+      <p class="text-sm text-muted" data-i18n="login.subtitle">Divergent Association Task</p>
     </div>
-
-    <!-- Card -->
     <div class="card" style="padding:2rem">
       <form id="loginForm">
         <div class="form-group">
-          <label class="form-label" for="username">用户名</label>
-          <input type="text" id="username" class="form-input" placeholder="请输入用户名" required autocomplete="username">
+          <label class="form-label" for="username" data-i18n="login.username">用户名</label>
+          <input type="text" id="username" class="form-input" data-i18n-placeholder="login.username_placeholder" placeholder="请输入用户名" required autocomplete="username">
         </div>
         <div class="form-group">
-          <label class="form-label" for="password">密码</label>
-          <input type="password" id="password" class="form-input" placeholder="请输入密码" required autocomplete="current-password">
+          <label class="form-label" for="password" data-i18n="login.password">密码</label>
+          <input type="password" id="password" class="form-input" data-i18n-placeholder="login.password_placeholder" placeholder="请输入密码" required autocomplete="current-password">
         </div>
         <div id="errorMsg" class="alert alert-error" style="display:none"></div>
-        <button type="submit" class="btn btn-primary" style="width:100%;padding:0.625rem 0">
-          登录
-        </button>
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:0.625rem 0" data-i18n="login.submit">登录</button>
       </form>
       <p class="text-center text-sm text-muted mt-4">
-        没有账号？<a href="/register">注册新账号</a>
+        <span data-i18n="login.no_account">没有账号？</span><a href="/register" data-i18n="login.register_link">注册新账号</a>
       </p>
     </div>
-
-    <p class="text-center text-sm text-muted mt-8">
-      默认管理员 &nbsp; admin / 123456
-    </p>
-
-    <!-- Paper citation -->
+    <p class="text-center text-sm text-muted mt-8" data-i18n="login.default_hint">默认管理员 admin / 123456</p>
     <p class="text-center mt-8" style="font-size:0.75rem;color:var(--text-muted);line-height:1.6">
-      基于论文：Ding, G., He, Y., Yi, K., & Li, S. (2024).
+      <span data-i18n="login.paper_citation">基于论文：Ding, G., He, Y., Yi, K., & Li, S. (2024).</span>
       <br><a href="https://doi.org/10.1016/j.tsc.2024.101503" target="_blank" rel="noopener">Using the divergent association task to measure divergent thinking in Chinese elementary school students</a>
       <br><em>Thinking Skills and Creativity, 52</em>, 101503.
     </p>
   </div>
-
   <script src="/js/api.js"></script>
   <script>
     if (isLoggedIn()) window.location.href = "/test";
-
+    applyI18n();
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value;
       const errorMsg = document.getElementById("errorMsg");
-      if (!username || !password) {
-        errorMsg.textContent = "请输入用户名和密码";
-        errorMsg.style.display = "block";
-        return;
-      }
+      if (!username || !password) { errorMsg.textContent = t("login.error_empty"); errorMsg.style.display = "block"; return; }
       try {
         errorMsg.style.display = "none";
         const btn = e.target.querySelector("button");
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner"></span> 登录中...';
+        btn.disabled = true; btn.textContent = t("login.logging_in");
         await login(username, password);
         window.location.href = "/test";
-      } catch (err) {
-        errorMsg.textContent = err.message || "登录失败";
-        errorMsg.style.display = "block";
-        const btn = e.target.querySelector("button");
-        btn.disabled = false;
-        btn.textContent = "登录";
-      }
+      } catch (err) { errorMsg.textContent = t("login.error_failed"); errorMsg.style.display = "block"; btn.disabled = false; btn.textContent = t("login.submit"); }
     });
   </script>
 </body>

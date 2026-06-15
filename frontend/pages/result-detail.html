@@ -1,82 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>结果详情 - DAT System</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-  <script src="/js/api.js"></script>
-</head>
-<body>
-  <nav id="navbar" class="navbar"></nav>
-  <div class="page-container" style="padding-top:2rem;padding-bottom:3rem;max-width:780px;margin:0 auto">
-    <a href="/results" class="btn btn-ghost mb-4" style="padding:0.375rem 0.625rem"><i class="ph ph-arrow-left"></i> 返回列表</a>
-    <div id="content"><div style="text-align:center;padding:4rem"><div class="spinner" style="margin:0 auto"></div></div></div>
-  </div>
-
-  <script>
-    if (!requireAuth()) {}
-    async function init() {
-      renderNavbar("results");
-      const id = new URLSearchParams(window.location.search).get("id");
-      if (!id) { document.getElementById("content").innerHTML=`<div class="alert alert-error">缺少记录ID</div>`; return; }
-      try { renderDetail(await apiGet(`/dat/result/${id}`), id); } catch(e) { document.getElementById("content").innerHTML=`<div class="alert alert-error">加载失败</div>`; }
-    }
-
-    async function renderDetail(d, rid) {
-      const sc = d.dat_score>60?'var(--success)':d.dat_score>40?'var(--accent)':'var(--warning)';
-      let hmHTML=`<p class="text-muted text-sm mt-4">有效词汇不足，无法生成热力图</p>`;
-      try {
-        const hd = await apiGet(`/dat/result/${rid}/heatmap-data`);
-        if (hd.words?.length>=2) hmHTML=`<div id="hmChart" style="width:100%;height:${Math.max(360,hd.words.length*55)}px;margin-top:0.5rem"></div><p class="text-sm text-muted mt-2">深红=距离近 · 深蓝=距离远</p>`;
-      } catch(e) {}
-      document.getElementById("content").innerHTML=`
-        <div class="card" style="text-align:center;margin-bottom:1.5rem">
-          <div class="score-label">DAT 得分</div>
-          <div class="score-display" style="margin:0.25rem 0 0.5rem;color:${sc}">${d.dat_score}</div>
-          <p class="text-sm text-muted">超越 <strong>${d.percentage}%</strong> 的用户 &nbsp;|&nbsp; 有效词汇：<strong>${d.effective_num}</strong>/10</p>
-        </div>
-        <div class="card mb-4">
-          <h2 class="card-header">作答词汇</h2>
-          <div style="display:flex;flex-wrap:wrap;gap:0.5rem">${d.words.map((w,i)=>w?`<span style="background:var(--bg-warm);padding:0.5rem 0.75rem;border-radius:var(--radius-md);font-size:0.9375rem">${i+1}. ${w}</span>`:`<span style="padding:0.5rem 0.75rem;font-size:0.9375rem;color:var(--text-muted);text-decoration:line-through">${i+1}. 空</span>`).join("")}</div>
-        </div>
-        <div class="card mb-4">
-          <h2 class="card-header">测试信息</h2>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;font-size:0.875rem">
-            <div><span class="text-muted">用户：</span><strong>${d.username}</strong></div>
-            <div><span class="text-muted">时间：</span><strong>${new Date(d.create_time).toLocaleString("zh-CN")}</strong></div>
-            <div><span class="text-muted">作答耗时：</span><strong>${d.spend_time||"无"} 秒</strong></div>
-            <div><span class="text-muted">限制时间：</span><strong>${d.limited_time||"无"} 秒</strong></div>
-          </div>
-        </div>
-        <div class="card" style="text-align:center">
-          <h2 class="card-header" style="display:flex;align-items:center;justify-content:center;gap:0.5rem">语义距离热力图</h2>
-          ${hmHTML}
-        </div>
-      `;
-      if (hmHTML.includes("hmChart")) {
-        setTimeout(async () => {
-          try {
-            const hd=await apiGet(`/dat/result/${rid}/heatmap-data`);
-            const dom=document.getElementById("hmChart"); if(!dom||!hd.words) return;
-            const chart=echarts.init(dom), words=hd.words, fd=[];
-            for(const it of hd.matrix){fd.push([it[0],it[1],it[2]]);fd.push([it[1],it[0],it[2]]);}
-            chart.setOption({
-              tooltip:{position:"top",formatter:p=>`<strong>${words[p.value[0]]}</strong> - <strong>${words[p.value[1]]}</strong><br/>语义距离: <strong>${p.value[2]}</strong>`},
-              grid:{left:"10%",right:"5%",top:"3%",bottom:"12%"},
-              xAxis:{type:"category",data:words,splitArea:{show:true},axisLabel:{rotate:25,fontSize:13,fontWeight:"bold",color:"#6b5e4a"}},
-              yAxis:{type:"category",data:words,splitArea:{show:true},axisLabel:{fontSize:13,fontWeight:"bold",color:"#6b5e4a"}},
-              visualMap:{min:0,max:100,calculable:true,orient:"horizontal",left:"center",bottom:"1%",inRange:{color:["#a50026","#d73027","#f46d43","#fdae61","#fee090","#e0f3f8","#abd9e9","#74add1","#4575b4","#313695"]},text:["远","近"],textStyle:{color:"#6b5e4a"}},
-              series:[{name:"语义距离",type:"heatmap",data:fd,label:{show:true,color:"#2c2416",fontSize:11,fontWeight:"bold",formatter:p=>{const v=p.value[2];return v>55||v<35?"":String(Math.round(v));}},emphasis:{itemStyle:{shadowBlur:8,shadowColor:"rgba(0,0,0,0.15)"}},itemStyle:{borderColor:"#ffffff",borderWidth:2}}],
-            });
-            window.addEventListener("resize",()=>chart.resize());
-          } catch(e) {}
-        }, 150);
-      }
-    }
-    init();
-  </script>
-</body>
-</html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title data-i18n="detail.title">结果详情 - DAT System</title>
+<link rel="stylesheet" href="/css/style.css"><script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script><script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script><script src="/js/i18n.js"></script><script src="/js/api.js"></script></head>
+<body><nav id="navbar" class="navbar"></nav>
+<div class="page-container" style="padding-top:2rem;padding-bottom:3rem;max-width:780px;margin:0 auto">
+<a href="/results" class="btn btn-ghost mb-4" style="padding:0.375rem 0.625rem"><i class="ph ph-arrow-left"></i> <span data-i18n="detail.back_list">返回列表</span></a>
+<div id="content"><div style="text-align:center;padding:4rem"><div class="spinner" style="margin:0 auto"></div></div></div></div>
+<script>if(!requireAuth()){}
+async function init(){renderNavbar("results");applyI18n();const id=new URLSearchParams(window.location.search).get("id");if(!id){document.getElementById("content").innerHTML='<div class="alert alert-error">'+t("detail.not_found")+'</div>';return;}try{renderDetail(await apiGet("/dat/result/"+id),id);}catch(e){document.getElementById("content").innerHTML='<div class="alert alert-error">'+t("detail.load_failed")+'</div>';}}
+async function renderDetail(d,rid){const sc=d.dat_score>60?"var(--success)":d.dat_score>40?"var(--accent)":"var(--warning)";let hm='<p class="text-muted text-sm mt-4">'+t("detail.heatmap_no_data")+'</p>';try{const hd=await apiGet("/dat/result/"+rid+"/heatmap-data");if(hd.words&&hd.words.length>=2)hm='<div id="hmChart" style="width:100%;height:'+Math.max(360,hd.words.length*55)+'px;margin-top:0.5rem"></div><p class="text-sm text-muted mt-2">'+t("detail.heatmap_legend")+'</p>';}catch(e){}document.getElementById("content").innerHTML='<div class="card" style="text-align:center;margin-bottom:1.5rem"><div class="score-label">'+t("detail.score_label")+'</div><div class="score-display" style="margin:0.25rem 0 0.5rem;color:'+sc+'">'+d.dat_score+'</div><p class="text-sm text-muted">'+t("detail.over_percent")+'<strong>'+d.percentage+'</strong>'+t("detail.over_percent_suffix")+' &nbsp;|&nbsp; '+t("detail.effective_words")+'：<strong>'+d.effective_num+'</strong>/10</p></div><div class="card mb-4"><h2 class="card-header" data-i18n="detail.words_section">作答词汇</h2><div style="display:flex;flex-wrap:wrap;gap:0.5rem">'+d.words.map((w,i)=>w?'<span style="background:var(--bg-warm);padding:0.5rem 0.75rem;border-radius:var(--radius-md);font-size:0.9375rem">'+(i+1)+'. '+w+'</span>':'<span style="padding:0.5rem 0.75rem;font-size:0.9375rem;color:var(--text-muted);text-decoration:line-through">'+(i+1)+'. '+t("detail.empty_word")+'</span>').join("")+'</div></div><div class="card mb-4"><h2 class="card-header" data-i18n="detail.info_section">测试信息</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;font-size:0.875rem"><div><span class="text-muted">'+t("detail.info_user")+'：</span><strong>'+d.username+'</strong></div><div><span class="text-muted">'+t("detail.info_time")+'：</span><strong>'+new Date(d.create_time).toLocaleString(t("date.locale"))+'</strong></div><div><span class="text-muted">'+t("detail.info_spent")+'：</span><strong>'+(d.spend_time||"")+t("detail.info_spent_unit")+'</strong></div><div><span class="text-muted">'+t("detail.info_limit")+'：</span><strong>'+(d.limited_time||"")+t("detail.info_limit_unit")+'</strong></div></div></div><div class="card" style="text-align:center"><h2 class="card-header" style="display:flex;align-items:center;justify-content:center;gap:0.5rem" data-i18n="detail.heatmap_title">语义距离热力图</h2>'+hm+'</div>';if(hm.includes("hmChart")){setTimeout(()=>renderHM(rid),150);}}
+async function renderHM(rid){try{const hd=await apiGet("/dat/result/"+rid+"/heatmap-data");const dom=document.getElementById("hmChart");if(!dom||!hd.words)return;const c=echarts.init(dom),w=hd.words,fd=[];for(const it of hd.matrix){fd.push([it[0],it[1],it[2]]);fd.push([it[1],it[0],it[2]]);}c.setOption({tooltip:{position:"top",formatter:p=>"<strong>"+w[p.value[0]]+"</strong> - <strong>"+w[p.value[1]]+"</strong><br/>"+t("detail.heatmap_tooltip")+" <strong>"+p.value[2]+"</strong>"},grid:{left:"10%",right:"5%",top:"3%",bottom:"12%"},xAxis:{type:"category",data:w,splitArea:{show:true},axisLabel:{rotate:25,fontSize:13,fontWeight:"bold",color:"#6b5e4a"}},yAxis:{type:"category",data:w,splitArea:{show:true},axisLabel:{fontSize:13,fontWeight:"bold",color:"#6b5e4a"}},visualMap:{min:0,max:100,calculable:true,orient:"horizontal",left:"center",bottom:"1%",inRange:{color:["#a50026","#d73027","#f46d43","#fdae61","#fee090","#e0f3f8","#abd9e9","#74add1","#4575b4","#313695"]},text:[t("detail.heatmap_far"),t("detail.heatmap_close")],textStyle:{color:"#6b5e4a"}},series:[{name:t("detail.heatmap_title"),type:"heatmap",data:fd,label:{show:true,color:"#2c2416",fontSize:11,fontWeight:"bold",formatter:p=>{const v=p.value[2];return v>55||v<35?"":String(Math.round(v));}},emphasis:{itemStyle:{shadowBlur:8,shadowColor:"rgba(0,0,0,0.15)"}},itemStyle:{borderColor:"#ffffff",borderWidth:2}}]});window.addEventListener("resize",()=>c.resize());}catch(e){}}
+init();</script></body></html>

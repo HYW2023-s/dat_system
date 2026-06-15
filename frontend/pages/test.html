@@ -1,256 +1,36 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DAT 测试 - DAT System</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-  <script src="/js/api.js"></script>
-</head>
-<body>
-  <nav id="navbar" class="navbar"></nav>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title data-i18n="test.title">DAT 测试 - DAT System</title>
+<link rel="stylesheet" href="/css/style.css"><script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script><script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script><script src="/js/i18n.js"></script><script src="/js/api.js"></script></head>
+<body><nav id="navbar" class="navbar"></nav>
+<div class="page-container" style="padding-top:2.5rem;padding-bottom:3rem">
+<div id="pretest" style="max-width:520px;margin:0 auto">
+<div style="text-align:center;margin-bottom:2rem"><div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;background:var(--accent-light);border-radius:12px;margin-bottom:0.75rem"><i class="ph ph-timer" style="font-size:1.5rem;color:var(--accent)"></i></div>
+<h1 style="font-size:1.5rem;margin-bottom:0.25rem" data-i18n="test.title">发散性思维测试</h1>
+<p class="text-muted"><span data-i18n="test.pretest_time_prefix">请在</span><strong id="pretestTime">4分钟</strong><span data-i18n="test.pretest_time_suffix"> 内输入 10个互不相关的名词</span></p></div>
+<div class="card" style="margin-bottom:1.5rem"><div style="display:flex;align-items:flex-start;gap:0.75rem"><i class="ph ph-info" style="color:var(--accent);margin-top:0.125rem"></i><div style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6"><p data-i18n="test.pretest_tip1">词汇之间的差异越大越好。例如："大海"和"数学"的距离很远，"苹果"和"香蕉"的距离很近。</p><p class="mt-2" data-i18n="test.pretest_tip2">请确保输入的是名词，不是动词或形容词。</p><p class="mt-2" data-i18n="test.pretest_tip3">系统会过滤无效词汇，至少需要 5个有效词 才能生成热力图。</p></div></div></div>
+<button class="btn btn-primary" onclick="startTest()" style="width:100%;padding:0.75rem;font-size:1rem" data-i18n="test.start_btn">开始作答</button></div>
 
-  <div class="page-container" style="padding-top:2.5rem;padding-bottom:3rem">
-    <!-- Pre-test -->
-    <div id="pretest" style="max-width:520px;margin:0 auto">
-      <div style="text-align:center;margin-bottom:2rem">
-        <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;background:var(--accent-light);border-radius:12px;margin-bottom:0.75rem">
-          <i class="ph ph-timer" style="font-size:1.5rem;color:var(--accent)"></i>
-        </div>
-        <h1 style="font-size:1.5rem;margin-bottom:0.25rem">发散性思维测试</h1>
-        <p class="text-muted">请在 <strong id="pretestTime">4分钟</strong> 内输入 <strong>10个互不相关的名词</strong></p>
-      </div>
+<div id="testArea" style="display:none;max-width:640px;margin:0 auto">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem"><h1 style="font-size:1.25rem" data-i18n="test.enter_words">请输入 10 个互不相关的名词</h1>
+<div style="text-align:right"><div class="text-sm text-muted" data-i18n="test.time_remaining">剩余时间</div><div id="timer" class="timer"></div></div></div>
+<div class="card" style="margin-bottom:1.25rem;padding:1rem"><div style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.8125rem;color:var(--text-secondary);line-height:1.6"><i class="ph ph-info" style="color:var(--accent);flex-shrink:0"></i><span data-i18n="test.rule_card">词汇差异越大得分越高。必须输入名词。至少 5个有效词 可生成热力图。</span></div></div>
+<div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem"><script>for(let i=1;i<=10;i++){document.write(`<div class="form-group"><label class="form-label">${i}</label><input type="text" id="word${i}" class="form-input" data-i18n-placeholder="test.input_placeholder" placeholder="输入名词..." maxlength="32" autocomplete="off"></div>`);}</script></div></div>
+<div id="testError" class="alert alert-error" style="display:none;margin-top:1rem"></div>
+<button class="btn btn-primary" onclick="submitTest()" style="width:100%;padding:0.75rem;margin-top:1.5rem;font-size:1rem" data-i18n="test.submit_btn">提交答案</button></div>
 
-      <div class="card" style="margin-bottom:1.5rem">
-        <div style="display:flex;align-items:flex-start;gap:0.75rem">
-          <i class="ph ph-info" style="color:var(--accent);margin-top:0.125rem"></i>
-          <div style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6">
-            <p>词汇之间的<strong>差异越大越好</strong>。例如："大海"和"数学"的距离很远，"苹果"和"香蕉"的距离很近。</p>
-            <p class="mt-2">请确保输入的是<strong>名词</strong>，不是动词或形容词。</p>
-            <p class="mt-2">系统会过滤无效词汇，至少需要 <strong>5个有效词</strong> 才能生成热力图。</p>
-          </div>
-        </div>
-      </div>
+<div id="resultArea" style="display:none;max-width:700px;margin:0 auto"></div></div>
 
-      <button class="btn btn-primary" onclick="startTest()" style="width:100%;padding:0.75rem;font-size:1rem">
-        开始作答
-      </button>
-    </div>
-
-    <!-- Test -->
-    <div id="testArea" style="display:none;max-width:640px;margin:0 auto">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-        <h1 style="font-size:1.25rem">请输入 10 个互不相关的名词</h1>
-        <div style="text-align:right">
-          <div class="text-sm text-muted">剩余时间</div>
-          <div id="timer" class="timer"></div>
-        </div>
-      </div>
-
-      <!-- Rules card -->
-      <div class="card" style="margin-bottom:1.25rem;padding:1rem">
-        <div style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.8125rem;color:var(--text-secondary);line-height:1.6">
-          <i class="ph ph-info" style="color:var(--accent);flex-shrink:0;margin-top:0.125rem"></i>
-          <div>
-            <span>词汇<strong>差异越大</strong>得分越高。必须输入<strong>名词</strong>，不填动词或形容词。至少 <strong>5个有效词</strong> 可生成热力图。</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-          <script>
-            for (let i = 1; i <= 10; i++) {
-              document.write(`
-                <div class="form-group">
-                  <label class="form-label">${i}</label>
-                  <input type="text" id="word${i}" class="form-input" placeholder="输入名词..." maxlength="32" autocomplete="off">
-                </div>
-              `);
-            }
-          </script>
-        </div>
-      </div>
-
-      <div id="testError" class="alert alert-error" style="display:none;margin-top:1rem"></div>
-
-      <button class="btn btn-primary" onclick="submitTest()" style="width:100%;padding:0.75rem;margin-top:1.5rem;font-size:1rem">
-        提交答案
-      </button>
-    </div>
-
-    <!-- Result -->
-    <div id="resultArea" style="display:none;max-width:700px;margin:0 auto"></div>
-  </div>
-
-  <script>
-    let timerInterval = null;
-    let timeLeft = 240;
-    let limitedTime = 240;
-    let startTime = null;
-
-    if (!requireAuth()) {}
-
-    async function init() {
-      renderNavbar("test");
-      try {
-        const config = await apiGet("/dat/test-config");
-        limitedTime = config.limited_time || 240;
-        timeLeft = limitedTime;
-        const mins = Math.floor(limitedTime / 60);
-        const secs = limitedTime % 60;
-        document.getElementById("pretestTime").textContent = `${mins}分${secs > 0 ? secs + "秒" : ""}`;
-      } catch (err) {
-        showToast("获取配置失败", "error");
-      }
-    }
-
-    function startTest() {
-      document.getElementById("pretest").style.display = "none";
-      document.getElementById("testArea").style.display = "block";
-      startTime = Date.now();
-      updateTimer();
-      timerInterval = setInterval(updateTimer, 1000);
-    }
-
-    function updateTimer() {
-      const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      timeLeft = limitedTime - elapsed;
-      const timerEl = document.getElementById("timer");
-      const mins = Math.floor(Math.max(0, timeLeft) / 60);
-      const secs = Math.max(0, timeLeft) % 60;
-      timerEl.textContent = `${mins}:${String(secs).padStart(2, "0")}`;
-      timerEl.className = "timer";
-      if (timeLeft <= 30) timerEl.classList.add("danger");
-      else if (timeLeft <= 60) timerEl.classList.add("warning");
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        showToast("时间到，自动提交", "info");
-        submitTest();
-      }
-    }
-
-    async function submitTest() {
-      clearInterval(timerInterval);
-      const words = {};
-      let hasInput = false;
-      for (let i = 1; i <= 10; i++) {
-        words[`word${i}`] = document.getElementById(`word${i}`).value.trim();
-        if (words[`word${i}`]) hasInput = true;
-      }
-      if (!hasInput) {
-        document.getElementById("testError").textContent = "请至少输入一个词汇";
-        document.getElementById("testError").style.display = "block";
-        timerInterval = setInterval(updateTimer, 1000);
-        return;
-      }
-      document.getElementById("testArea").style.display = "none";
-      document.getElementById("pretest").style.display = "none";
-      const resultDiv = document.getElementById("resultArea");
-      resultDiv.style.display = "block";
-      resultDiv.innerHTML = `<div style="text-align:center;padding:4rem"><div class="spinner" style="margin:0 auto 1rem"></div><p class="text-muted">正在计算得分...</p></div>`;
-
-      try {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        const result = await apiPost("/dat/calculate", {
-          ...words,
-          spend_time: String(elapsed),
-          limited_time: String(limitedTime),
-        });
-        displayResult(result);
-      } catch (err) {
-        resultDiv.innerHTML = `<div class="alert alert-error" style="text-align:center"><p>计算失败：${err.message}</p><button class="btn btn-secondary mt-4" onclick="retryTest()">重新测试</button></div>`;
-      }
-    }
-
-    function displayResult(result) {
-      const scoreColor = result.dat_score > 60 ? 'var(--success)' : result.dat_score > 40 ? 'var(--accent)' : 'var(--warning)';
-      document.getElementById("resultArea").innerHTML = `
-        <div class="card" style="text-align:center;margin-bottom:1.5rem">
-          <div class="score-label">DAT 得分</div>
-          <div class="score-display" style="margin:0.25rem 0 0.5rem;color:${scoreColor}">${result.dat_score}</div>
-          <p class="text-sm text-muted">
-            有效词汇：<strong>${result.effective_num}</strong>/10 &nbsp;|&nbsp;
-            超越 <strong>${result.percentage}%</strong> 的用户
-            ${result.provider_name ? `&nbsp;|&nbsp; 模型：${result.provider_name}` : ''}
-          </p>
-        </div>
-        <div class="card" style="text-align:center">
-          <h2 class="card-header" style="display:flex;align-items:center;justify-content:center;gap:0.5rem">
-            <i class="ph ph-chart-scatter" style="color:var(--accent)"></i> 语义距离热力图
-          </h2>
-          <p class="text-sm text-muted mb-4">深红 = 距离近 &nbsp; 深蓝 = 距离远</p>
-          <div id="heatmapResult"></div>
-        </div>
-        <div style="text-align:center;margin-top:1.5rem;display:flex;gap:0.75rem;justify-content:center">
-          <button class="btn btn-secondary" onclick="retryTest()">重新测试</button>
-          <a href="/results" class="btn btn-ghost">查看历史记录</a>
-        </div>
-      `;
-      loadHeatmapForLatestResult();
-    }
-
-    async function loadHeatmapForLatestResult() {
-      try {
-        const resultsData = await apiGet("/dat/results?page=1&page_size=1");
-        if (resultsData.items.length > 0) {
-          const heatmapData = await apiGet(`/dat/result/${resultsData.items[0].id}/heatmap-data`);
-          if (heatmapData.words && heatmapData.words.length >= 2) {
-            renderEChartsHeatmap(heatmapData);
-            return;
-          }
-        }
-      } catch (e) {}
-      document.getElementById("heatmapResult").innerHTML = `<p class="text-muted text-sm mt-4">有效词汇不足，无法生成热力图</p>`;
-    }
-
-    function renderEChartsHeatmap(data) {
-      const dom = document.getElementById("heatmapResult");
-      if (!dom) return;
-      dom.innerHTML = `<div id="heatmapChart" style="width:100%;height:${Math.max(360, data.words.length * 55)}px"></div>`;
-      const chart = echarts.init(document.getElementById("heatmapChart"));
-      const words = data.words;
-      const fullData = [];
-      for (const item of data.matrix) {
-        fullData.push([item[0], item[1], item[2]]);
-        fullData.push([item[1], item[0], item[2]]);
-      }
-      chart.setOption({
-        tooltip: {
-          position: "top",
-          formatter: (p) => `<strong>${words[p.value[0]]}</strong> - <strong>${words[p.value[1]]}</strong><br/>语义距离: <strong>${p.value[2]}</strong>`,
-        },
-        grid: { left: "10%", right: "5%", top: "3%", bottom: "12%" },
-        xAxis: {
-          type: "category", data: words, splitArea: { show: true },
-          axisLabel: { rotate: 25, fontSize: 13, fontWeight: "bold", color: "#6b5e4a" },
-        },
-        yAxis: {
-          type: "category", data: words, splitArea: { show: true },
-          axisLabel: { fontSize: 13, fontWeight: "bold", color: "#6b5e4a" },
-        },
-        visualMap: {
-          min: 0, max: 100, calculable: true, orient: "horizontal", left: "center", bottom: "1%",
-          inRange: { color: ["#a50026","#d73027","#f46d43","#fdae61","#fee090","#e0f3f8","#abd9e9","#74add1","#4575b4","#313695"] },
-          text: ["远", "近"], textStyle: { color: "#6b5e4a" },
-        },
-        series: [{
-          name: "语义距离", type: "heatmap", data: fullData,
-          label: {
-            show: true, color: "#2c2416", fontSize: 11, fontWeight: "bold",
-            formatter: (p) => { const v = p.value[2]; return v > 55 || v < 35 ? "" : String(Math.round(v)); },
-          },
-          emphasis: { itemStyle: { shadowBlur: 8, shadowColor: "rgba(0,0,0,0.15)" } },
-          itemStyle: { borderColor: "#ffffff", borderWidth: 2 },
-        }],
-      });
-      window.addEventListener("resize", () => chart.resize());
-    }
-
-    function retryTest() { window.location.reload(); }
-    init();
-  </script>
-</body>
-</html>
+<script>
+let timerInterval=null,timeLeft=240,limitedTime=240,startTime=null;
+if(!requireAuth()){}
+async function init(){renderNavbar("test");applyI18n();try{const config=await apiGet("/dat/test-config");limitedTime=config.limited_time||240;timeLeft=limitedTime;const m=Math.floor(limitedTime/60),s=limitedTime%60;document.getElementById("pretestTime").textContent=m+t("test.minute_unit")+(s>0?s+t("test.second_unit"):"");}catch(e){showToast(t("test.config_failed"),"error");}}
+function startTest(){document.getElementById("pretest").style.display="none";document.getElementById("testArea").style.display="block";startTime=Date.now();updateTimer();timerInterval=setInterval(updateTimer,1000);}
+function updateTimer(){const e=Math.floor((Date.now()-startTime)/1000);timeLeft=limitedTime-e;const t=document.getElementById("timer"),m=Math.floor(Math.max(0,timeLeft)/60),s=Math.max(0,timeLeft)%60;t.textContent=m+":"+String(s).padStart(2,"0");t.className="timer";if(timeLeft<=30)t.classList.add("danger");else if(timeLeft<=60)t.classList.add("warning");if(timeLeft<=0){clearInterval(timerInterval);showToast(t("test.time_up"),"info");submitTest();}}
+async function submitTest(){clearInterval(timerInterval);const w={};let h=false;for(let i=1;i<=10;i++){w["word"+i]=document.getElementById("word"+i).value.trim();if(w["word"+i])h=true;}if(!h){document.getElementById("testError").textContent=t("test.error_empty");document.getElementById("testError").style.display="block";timerInterval=setInterval(updateTimer,1000);return;}document.getElementById("testArea").style.display="none";document.getElementById("pretest").style.display="none";const rd=document.getElementById("resultArea");rd.style.display="block";rd.innerHTML='<div style="text-align:center;padding:4rem"><div class="spinner" style="margin:0 auto 1rem"></div><p class="text-muted">'+t("test.calculating")+'</p></div>';try{const e=Math.floor((Date.now()-startTime)/1000);const r=await apiPost("/dat/calculate",{...w,spend_time:String(e),limited_time:String(limitedTime)});displayResult(r);}catch(e){rd.innerHTML='<div class="alert alert-error" style="text-align:center"><p>'+t("test.error_calc_failed")+e.message+'</p><button class="btn btn-secondary mt-4" onclick="retryTest()">'+t("test.retry_btn")+'</button></div>';}}
+function displayResult(r){const sc=r.dat_score>60?"var(--success)":r.dat_score>40?"var(--accent)":"var(--warning)";document.getElementById("resultArea").innerHTML='<div class="card" style="text-align:center;margin-bottom:1.5rem"><div class="score-label">'+t("test.score_label")+'</div><div class="score-display" style="margin:0.25rem 0 0.5rem;color:'+sc+'">'+r.dat_score+'</div><p class="text-sm text-muted">'+t("test.effective_words")+'：<strong>'+r.effective_num+'</strong>/10 &nbsp;|&nbsp; '+t("test.over_percent")+'<strong>'+r.percentage+'</strong>'+t("test.over_percent_suffix")+(r.provider_name?" &nbsp;|&nbsp; "+t("test.model_label")+r.provider_name:"")+'</p></div><div class="card" style="text-align:center"><h2 class="card-header" style="display:flex;align-items:center;justify-content:center;gap:0.5rem">'+t("test.heatmap_title")+'</h2><p class="text-sm text-muted mb-4">'+t("test.heatmap_legend")+'</p><div id="heatmapResult"></div></div><div style="text-align:center;margin-top:1.5rem;display:flex;gap:0.75rem;justify-content:center"><button class="btn btn-secondary" onclick="retryTest()">'+t("test.retry_btn")+'</button><a href="/results" class="btn btn-ghost">'+t("test.history_btn")+'</a></div>';loadHeatmapForLatestResult();}
+async function loadHeatmapForLatestResult(){try{const d=await apiGet("/dat/results?page=1&page_size=1");if(d.items.length>0){const h=await apiGet("/dat/result/"+d.items[0].id+"/heatmap-data");if(h.words&&h.words.length>=2){renderEChartsHeatmap(h);return;}}}catch(e){}document.getElementById("heatmapResult").innerHTML='<p class="text-muted text-sm mt-4">'+t("test.heatmap_no_data")+'</p>';}
+function renderEChartsHeatmap(data){const dom=document.getElementById("heatmapResult");if(!dom)return;dom.innerHTML='<div id="heatmapChart" style="width:100%;height:'+Math.max(360,data.words.length*55)+'px"></div>';const c=echarts.init(document.getElementById("heatmapChart")),w=data.words,fd=[];for(const it of data.matrix){fd.push([it[0],it[1],it[2]]);fd.push([it[1],it[0],it[2]]);}c.setOption({tooltip:{position:"top",formatter:p=>"<strong>"+w[p.value[0]]+"</strong> - <strong>"+w[p.value[1]]+"</strong><br/>"+t("test.heatmap_tooltip_dist")+" <strong>"+p.value[2]+"</strong>"},grid:{left:"10%",right:"5%",top:"3%",bottom:"12%"},xAxis:{type:"category",data:w,splitArea:{show:true},axisLabel:{rotate:25,fontSize:13,fontWeight:"bold",color:"#6b5e4a"}},yAxis:{type:"category",data:w,splitArea:{show:true},axisLabel:{fontSize:13,fontWeight:"bold",color:"#6b5e4a"}},visualMap:{min:0,max:100,calculable:true,orient:"horizontal",left:"center",bottom:"1%",inRange:{color:["#a50026","#d73027","#f46d43","#fdae61","#fee090","#e0f3f8","#abd9e9","#74add1","#4575b4","#313695"]},text:[t("test.heatmap_far"),t("test.heatmap_close")],textStyle:{color:"#6b5e4a"}},series:[{name:t("test.heatmap_title"),type:"heatmap",data:fd,label:{show:true,color:"#2c2416",fontSize:11,fontWeight:"bold",formatter:p=>{const v=p.value[2];return v>55||v<35?"":String(Math.round(v));}},emphasis:{itemStyle:{shadowBlur:8,shadowColor:"rgba(0,0,0,0.15)"}},itemStyle:{borderColor:"#ffffff",borderWidth:2}}]});window.addEventListener("resize",()=>c.resize());}
+function retryTest(){window.location.reload();}
+init();
+</script></body></html>

@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.database import get_db
 from backend.models import User
 from backend.routers.auth import get_admin_user, get_current_user
+from backend.i18n import t as i18n_t, get_request_lang
 from backend.services.embedding import (
     list_providers, set_active_provider, get_active_provider,
     register_provider, get_provider, unregister_provider,
@@ -104,29 +105,29 @@ async def get_templates():
 async def activate_model(
     data: SetApiKeyRequest,
     current_user: User = Depends(get_admin_user),
+    lang: str = Depends(get_request_lang),
 ):
     """Activate a built-in model with API key."""
-    # Check if it's ali-qwen (non-standard API)
     if data.model_name == "ali-qwen-v4":
         existing = get_provider("ali-qwen-v4")
         if existing:
             existing.set_api_key(data.api_key)
         else:
             register_provider(AliQwenProvider(api_key=data.api_key))
-        return MessageResponse(message="阿里百炼 text-embedding-v4 已激活")
+        return MessageResponse(message=i18n_t("model.ali_activated", lang))
 
-    # Try built-in OpenAPI-compatible providers
     provider = register_api_provider(data.model_name, data.api_key)
     if provider is None:
-        raise HTTPException(status_code=404, detail=f"未知模型: {data.model_name}")
+        raise HTTPException(status_code=404, detail=i18n_t("model.not_found", lang, name=data.model_name))
 
-    return MessageResponse(message=f"{provider.description} 已激活")
+    return MessageResponse(message=i18n_t("model.activated", lang, desc=provider.description))
 
 
 @router.post("/custom", response_model=MessageResponse)
 async def add_custom_provider(
     data: CustomProviderRequest,
     current_user: User = Depends(get_admin_user),
+    lang: str = Depends(get_request_lang),
 ):
     """Add a custom OpenAI-compatible embedding provider."""
     name_slug = data.name.lower().replace(" ", "-")
@@ -137,34 +138,36 @@ async def add_custom_provider(
         dimension=data.dimension,
         api_key=data.api_key,
     )
-    return MessageResponse(message=f"自定义模型 '{provider.description}' 已添加")
+    return MessageResponse(message=i18n_t("model.custom_added", lang, desc=provider.description))
 
 
 @router.post("/delete", response_model=MessageResponse)
 async def delete_provider(
     data: DeleteProviderRequest,
     current_user: User = Depends(get_admin_user),
+    lang: str = Depends(get_request_lang),
 ):
     """Remove a non-built-in provider."""
     if data.model_name == "word2vec":
-        raise HTTPException(status_code=400, detail="不能删除 Word2Vec 默认模型")
+        raise HTTPException(status_code=400, detail=i18n_t("model.cannot_delete_default", lang))
     ok = unregister_provider(data.model_name)
     if not ok:
-        raise HTTPException(status_code=404, detail="模型不存在或无法删除")
-    return MessageResponse(message=f"模型 '{data.model_name}' 已移除")
+        raise HTTPException(status_code=404, detail=i18n_t("model.not_found", lang, name=data.model_name))
+    return MessageResponse(message=i18n_t("model.removed", lang, name=data.model_name))
 
 
 @router.post("/switch", response_model=MessageResponse)
 async def switch_model(
     data: SwitchModelRequest,
     current_user: User = Depends(get_current_user),
+    lang: str = Depends(get_request_lang),
 ):
     """Switch active embedding model."""
     success = set_active_provider(data.model_name)
     if not success:
-        raise HTTPException(status_code=404, detail=f"模型 '{data.model_name}' 未激活或不存在")
+        raise HTTPException(status_code=404, detail=i18n_t("model.not_activated", lang, name=data.model_name))
     p = get_active_provider()
-    return MessageResponse(message=f"已切换到 {p.description}")
+    return MessageResponse(message=i18n_t("model.switched", lang, desc=p.description))
 
 
 @router.get("/cache-stats")

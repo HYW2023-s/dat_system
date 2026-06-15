@@ -1,47 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>数据分析 - DAT System</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-  <script src="/js/api.js"></script>
-</head>
-<body>
-  <nav id="navbar" class="navbar"></nav>
-  <div class="page-container" style="padding-top:2rem;padding-bottom:3rem">
-    <h1 style="margin-bottom:1.5rem">数据分析</h1>
-    <div id="statsCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;margin-bottom:2rem"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
-      <div class="card"><h2 class="card-header">得分分布</h2><div id="barChart" style="height:320px"></div></div>
-      <div class="card"><h2 class="card-header">箱型图</h2><div id="boxChart" style="height:320px"></div></div>
-    </div>
-  </div>
-
-  <script>
-    if (!requireAdmin()) {}
-    async function init() {
-      renderNavbar("analysis");
-      try {
-        const data = await apiGet("/admin/analysis");
-        renderStats(data.stats);
-        renderCharts(data.distribution, data.boxplot_data);
-      } catch(e) { document.querySelector(".page-container").innerHTML=`<div class="alert alert-error">加载失败</div>`; }
-    }
-    function renderStats(s) {
-      const cards=[{l:"样本数",v:s.count,i:"users"},{l:"平均分",v:s.avg,i:"target"},{l:"最高分",v:s.max},{l:"最低分",v:s.min},{l:"中位数",v:s.median},{l:"标准差",v:s.std}];
-      document.getElementById("statsCards").innerHTML=cards.map(c=>`<div class="card" style="text-align:center"><div class="score-label">${c.l}</div><div style="font-size:1.5rem;font-weight:700;color:var(--text-primary);margin:0.25rem 0">${c.v}</div></div>`).join("");
-    }
-    function renderCharts(dist, box) {
-      const bar=echarts.init(document.getElementById("barChart"));
-      bar.setOption({tooltip:{trigger:"axis"},grid:{left:"3%",right:"4%",bottom:"3%",containLabel:true},xAxis:{type:"category",data:Object.keys(dist),axisLabel:{color:"#6b5e4a"}},yAxis:{type:"value"},series:[{data:Object.values(dist),type:"bar",itemStyle:{color:"#b8753e"}}]});
-      const boxChart=echarts.init(document.getElementById("boxChart"));
-      boxChart.setOption({tooltip:{trigger:"item"},grid:{left:"3%",right:"4%",bottom:"3%",containLabel:true},xAxis:{type:"category",data:["DAT得分"]},yAxis:{type:"value"},series:[{type:"boxplot",data:[box.scores],itemStyle:{color:"#b8753e"}}]});
-      window.addEventListener("resize",()=>{bar.resize();boxChart.resize();});
-    }
-    init();
-  </script>
-</body>
-</html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title data-i18n="analysis.title">数据分析 - DAT System</title>
+<link rel="stylesheet" href="/css/style.css"><script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script><script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script><script src="/js/i18n.js"></script><script src="/js/api.js"></script></head>
+<body><nav id="navbar" class="navbar"></nav>
+<div class="page-container" style="padding-top:2rem;padding-bottom:3rem"><h1 style="margin-bottom:1.5rem" data-i18n="analysis.title">数据分析</h1>
+<div id="statsCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;margin-bottom:2rem"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem"><div class="card"><h2 class="card-header" data-i18n="analysis.bar_title">得分分布</h2><div id="barChart" style="height:320px"></div></div><div class="card"><h2 class="card-header" data-i18n="analysis.box_title">箱型图</h2><div id="boxChart" style="height:320px"></div></div></div></div>
+<script>if(!requireAdmin()){}
+async function init(){renderNavbar("analysis");applyI18n();try{const d=await apiGet("/admin/analysis");renderStats(d.stats);renderCharts(d.distribution,d.boxplot_data);}catch(e){document.querySelector(".page-container").innerHTML='<div class="alert alert-error">'+t("analysis.load_failed")+'</div>';}}
+function renderStats(s){const cards=[{l:"analysis.sample_count",v:s.count},{l:"analysis.avg",v:s.avg},{l:"analysis.max",v:s.max},{l:"analysis.min",v:s.min},{l:"analysis.median",v:s.median},{l:"analysis.std",v:s.std}];document.getElementById("statsCards").innerHTML=cards.map(c=>'<div class="card" style="text-align:center"><div class="score-label">'+t(c.l)+'</div><div style="font-size:1.5rem;font-weight:700;color:var(--text-primary);margin:0.25rem 0">'+c.v+'</div></div>').join("");}
+function renderCharts(dist,box){const bar=echarts.init(document.getElementById("barChart"));bar.setOption({tooltip:{trigger:"axis"},grid:{left:"3%",right:"4%",bottom:"3%",containLabel:true},xAxis:{type:"category",data:Object.keys(dist),axisLabel:{color:"#6b5e4a"}},yAxis:{type:"value"},series:[{data:Object.values(dist),type:"bar",itemStyle:{color:"#b8753e"}}]});const bc=echarts.init(document.getElementById("boxChart"));bc.setOption({tooltip:{trigger:"item"},grid:{left:"3%",right:"4%",bottom:"3%",containLabel:true},xAxis:{type:"category",data:["DAT"]},yAxis:{type:"value"},series:[{type:"boxplot",data:[box.scores],itemStyle:{color:"#b8753e"}}]});window.addEventListener("resize",()=>{bar.resize();bc.resize();});}
+init();</script></body></html>

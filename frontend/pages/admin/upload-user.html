@@ -1,51 +1,17 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>用户上传 - DAT System</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
-  <script src="/js/api.js"></script>
-</head>
-<body>
-  <nav id="navbar" class="navbar"></nav>
-  <div class="page-container" style="padding-top:2rem;padding-bottom:3rem;max-width:600px;margin:0 auto">
-    <a href="/admin" class="btn btn-ghost mb-4" style="padding:0.375rem 0.625rem"><i class="ph ph-arrow-left"></i> 返回</a>
-    <h1 style="margin-bottom:1.5rem">批量上传用户</h1>
-    <div class="card mb-4">
-      <h2 class="card-header">上传 Excel 文件</h2>
-      <div class="alert alert-info mb-4">Excel 文件需包含 <code>username</code> 和 <code>password</code> 列。</div>
-      <form id="uploadForm">
-        <div class="form-group"><label class="form-label">选择文件</label><input type="file" id="fileInput" class="form-input" accept=".xlsx,.xls" required></div>
-        <div id="uploadError" class="alert alert-error" style="display:none"></div>
-        <div id="uploadSuccess" class="alert alert-success" style="display:none"></div>
-        <button type="submit" class="btn btn-primary">上传导入</button>
-      </form>
-    </div>
-    <div class="card">
-      <h2 class="card-header">模板示例</h2>
-      <div class="table-container" style="max-width:320px">
-        <table><thead><tr><th>username</th><th>password</th></tr></thead><tbody><tr><td>student01</td><td>123456</td></tr><tr><td>student02</td><td>123456</td></tr></tbody></table>
-      </div>
-    </div>
-  </div>
-  <script>
-    if (!requireAdmin()) {}
-    renderNavbar("admin");
-    document.getElementById("uploadForm").addEventListener("submit",async(e)=>{
-      e.preventDefault();
-      const file=document.getElementById("fileInput").files[0],err=document.getElementById("uploadError"),ok=document.getElementById("uploadSuccess");
-      if(!file){err.textContent="请选择文件";err.style.display="block";return;}
-      err.style.display="none";ok.style.display="none";
-      try{
-        const fd=new FormData();fd.append("file",file);
-        const r=await fetch("/api/admin/upload-users",{method:"POST",headers:{"Authorization":`Bearer ${getToken()}`},body:fd});
-        const d=await r.json();if(!r.ok)throw new Error(d.detail||"上传失败");
-        ok.innerHTML=`<i class="ph ph-check-circle"></i> ${d.message}${d.skipped?.length?`<br><small>跳过：${d.skipped.join(", ")}</small>`:""}`;
-        ok.style.display="block";document.getElementById("fileInput").value="";
-      }catch(ex){err.textContent=ex.message;err.style.display="block";}
-    });
-  </script>
-</body>
-</html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title data-i18n="upload.title">用户上传 - DAT System</title>
+<link rel="stylesheet" href="/css/style.css"><script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script><script src="/js/i18n.js"></script><script src="/js/api.js"></script></head>
+<body><nav id="navbar" class="navbar"></nav>
+<div class="page-container" style="padding-top:2rem;padding-bottom:3rem;max-width:600px;margin:0 auto">
+<a href="/admin" class="btn btn-ghost mb-4" style="padding:0.375rem 0.625rem"><i class="ph ph-arrow-left"></i> <span data-i18n="upload.back">返回</span></a>
+<h1 style="margin-bottom:1.5rem" data-i18n="upload.title">批量上传用户</h1>
+<div class="card mb-4"><h2 class="card-header" data-i18n="upload.title">批量上传用户</h2>
+<div class="alert alert-info mb-4" data-i18n="upload.file_hint">Excel 文件需包含 username 和 password 列。</div>
+<form id="uploadForm"><div class="form-group"><label class="form-label" data-i18n="upload.choose_file">选择文件</label><input type="file" id="fileInput" class="form-input" accept=".xlsx,.xls" required></div>
+<div id="uploadError" class="alert alert-error" style="display:none"></div><div id="uploadSuccess" class="alert alert-success" style="display:none"></div>
+<button type="submit" class="btn btn-primary" data-i18n="upload.upload_btn">上传导入</button></form></div>
+<div class="card"><h2 class="card-header" data-i18n="upload.template_title">模板示例</h2><div class="table-container" style="max-width:320px"><table><thead><tr><th>username</th><th>password</th></tr></thead><tbody><tr><td>student01</td><td>123456</td></tr><tr><td>student02</td><td>123456</td></tr></tbody></table></div></div></div>
+<script>if(!requireAdmin()){}
+renderNavbar("admin");applyI18n();
+document.getElementById("uploadForm").addEventListener("submit",async(e)=>{e.preventDefault();const file=document.getElementById("fileInput").files[0],err=document.getElementById("uploadError"),ok=document.getElementById("uploadSuccess");if(!file){err.textContent=t("upload.error_no_file");err.style.display="block";return;}err.style.display="none";ok.style.display="none";try{const fd=new FormData();fd.append("file",file);const r=await fetch("/api/admin/upload-users",{method:"POST",headers:{"Authorization":"Bearer "+getToken()},body:fd});const d=await r.json();if(!r.ok)throw new Error(d.detail||t("upload.error_upload"));ok.innerHTML='<i class="ph ph-check-circle"></i> '+d.message+(d.skipped&&d.skipped.length?'<br><small>'+t("upload.error_upload")+': '+d.skipped.join(", ")+'</small>':'');ok.style.display="block";document.getElementById("fileInput").value="";}catch(ex){err.textContent=ex.message;err.style.display="block";}});</script></body></html>

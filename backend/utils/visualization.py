@@ -28,7 +28,7 @@ plt.rcParams["font.sans-serif"] = _font_candidates
 plt.rcParams["axes.unicode_minus"] = False
 
 
-def generate_heatmap(valid_words: list, dat_score: int) -> str:
+def generate_heatmap(valid_words: list, dat_score: int, lang: str = "zh") -> str:
     """
     Generate a clean heatmap image as fallback (ECharts is the primary renderer).
 
@@ -107,12 +107,13 @@ def generate_heatmap(valid_words: list, dat_score: int) -> str:
 
     # Colorbar
     cbar = fig.colorbar(im, ax=ax, shrink=0.82, pad=0.02)
-    cbar.set_label("语义距离", fontsize=11)
+    from backend.i18n import t as i18n_t
+    cbar.set_label(i18n_t("viz.distance_label", lang), fontsize=11)
     cbar.ax.tick_params(labelsize=9)
 
     # Title
     ax.set_title(
-        f"DAT 语义距离矩阵       得分: {dat_score}",
+        i18n_t("viz.title", lang, score=dat_score),
         fontsize=13, fontweight="bold", pad=12,
     )
 

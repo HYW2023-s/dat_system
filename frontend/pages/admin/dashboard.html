@@ -1,86 +1,31 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>管理面板 - DAT System</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
-  <script src="/js/api.js"></script>
-</head>
-<body>
-  <nav id="navbar" class="navbar"></nav>
-  <div class="page-container" style="padding-top:2rem;padding-bottom:3rem">
-    <h1 style="margin-bottom:1.5rem">管理面板</h1>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem">
-      <a href="/admin/upload-user" class="card" style="text-decoration:none;cursor:pointer;transition:all 0.15s">
-        <i class="ph ph-upload" style="font-size:1.5rem;color:var(--accent);margin-bottom:0.5rem;display:block"></i>
-        <h2 style="font-size:1rem;margin-bottom:0.25rem">批量上传用户</h2>
-        <p class="text-sm text-muted">通过 Excel 文件导入用户</p>
-      </a>
-      <a href="/admin/task-config" class="card" style="text-decoration:none;cursor:pointer;transition:all 0.15s">
-        <i class="ph ph-clock" style="font-size:1.5rem;color:var(--accent);margin-bottom:0.5rem;display:block"></i>
-        <h2 style="font-size:1rem;margin-bottom:0.25rem">任务时间配置</h2>
-        <p class="text-sm text-muted">调整测试限制时间</p>
-      </a>
-      <a href="/analysis" class="card" style="text-decoration:none;cursor:pointer;transition:all 0.15s">
-        <i class="ph ph-chart-bar" style="font-size:1.5rem;color:var(--accent);margin-bottom:0.5rem;display:block"></i>
-        <h2 style="font-size:1rem;margin-bottom:0.25rem">数据分析</h2>
-        <p class="text-sm text-muted">查看统计分析</p>
-      </a>
-      <a href="/model-config" class="card" style="text-decoration:none;cursor:pointer;transition:all 0.15s">
-        <i class="ph ph-cpu" style="font-size:1.5rem;color:var(--accent);margin-bottom:0.5rem;display:block"></i>
-        <h2 style="font-size:1rem;margin-bottom:0.25rem">Embedding 模型</h2>
-        <p class="text-sm text-muted">配置词向量模型</p>
-      </a>
-      <div class="card" style="cursor:pointer" onclick="exportCSV()">
-        <i class="ph ph-file-csv" style="font-size:1.5rem;color:var(--accent);margin-bottom:0.5rem;display:block"></i>
-        <h2 style="font-size:1rem;margin-bottom:0.25rem">导出 CSV</h2>
-        <p class="text-sm text-muted">下载作答记录为 CSV</p>
-      </div>
-      <div class="card" style="cursor:pointer" onclick="exportXLSX()">
-        <i class="ph ph-file-xls" style="font-size:1.5rem;color:var(--accent);margin-bottom:0.5rem;display:block"></i>
-        <h2 style="font-size:1rem;margin-bottom:0.25rem">导出 Excel</h2>
-        <p class="text-sm text-muted">下载作答记录为 Excel</p>
-      </div>
-      <div class="card" style="cursor:pointer" onclick="showPasswordModal()">
-        <i class="ph ph-lock-key" style="font-size:1.5rem;color:var(--accent);margin-bottom:0.5rem;display:block"></i>
-        <h2 style="font-size:1rem;margin-bottom:0.25rem">修改密码</h2>
-        <p class="text-sm text-muted">修改当前用户密码</p>
-      </div>
-    </div>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title data-i18n="admin.title">管理面板 - DAT System</title>
+<link rel="stylesheet" href="/css/style.css"><script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script><script src="/js/i18n.js"></script><script src="/js/api.js"></script></head>
+<body><nav id="navbar" class="navbar"></nav>
+<div class="page-container" style="padding-top:2rem;padding-bottom:3rem">
+<h1 style="margin-bottom:1.5rem" data-i18n="admin.title">管理面板</h1>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem">
+<a href="/admin/upload-user" class="card" style="text-decoration:none;cursor:pointer"><i class="ph ph-upload" style="font-size:1.5rem;color:var(--accent);margin-bottom:0.5rem;display:block"></i><h2 style="font-size:1rem;margin-bottom:0.25rem" data-i18n="admin.upload_users">批量上传用户</h2><p class="text-sm text-muted" data-i18n="admin.upload_users_desc">通过 Excel 文件导入用户</p></a>
+<a href="/admin/task-config" class="card" style="text-decoration:none;cursor:pointer"><i class="ph ph-clock" style="font-size:1.5rem;color:var(--accent);margin-bottom:0.5rem;display:block"></i><h2 style="font-size:1rem;margin-bottom:0.25rem" data-i18n="admin.task_config">任务时间配置</h2><p class="text-sm text-muted" data-i18n="admin.task_config_desc">调整测试限制时间</p></a>
+<a href="/analysis" class="card" style="text-decoration:none;cursor:pointer"><i class="ph ph-chart-bar" style="font-size:1.5rem;color:var(--accent);margin-bottom:0.5rem;display:block"></i><h2 style="font-size:1rem;margin-bottom:0.25rem" data-i18n="admin.data_analysis">数据分析</h2><p class="text-sm text-muted" data-i18n="admin.data_analysis_desc">查看统计分析</p></a>
+<a href="/model-config" class="card" style="text-decoration:none;cursor:pointer"><i class="ph ph-cpu" style="font-size:1.5rem;color:var(--accent);margin-bottom:0.5rem;display:block"></i><h2 style="font-size:1rem;margin-bottom:0.25rem" data-i18n="admin.model_config">Embedding 模型</h2><p class="text-sm text-muted" data-i18n="admin.model_config_desc">配置词向量模型</p></a>
+<div class="card" style="cursor:pointer" onclick="exportCSV()"><i class="ph ph-file-csv" style="font-size:1.5rem;color:var(--accent);margin-bottom:0.5rem;display:block"></i><h2 style="font-size:1rem;margin-bottom:0.25rem" data-i18n="admin.export_csv">导出 CSV</h2><p class="text-sm text-muted" data-i18n="admin.export_csv_desc">下载作答记录为 CSV</p></div>
+<div class="card" style="cursor:pointer" onclick="exportXLSX()"><i class="ph ph-file-xls" style="font-size:1.5rem;color:var(--accent);margin-bottom:0.5rem;display:block"></i><h2 style="font-size:1rem;margin-bottom:0.25rem" data-i18n="admin.export_xlsx">导出 Excel</h2><p class="text-sm text-muted" data-i18n="admin.export_xlsx_desc">下载作答记录为 Excel</p></div>
+<div class="card" style="cursor:pointer" onclick="showPasswordModal()"><i class="ph ph-lock-key" style="font-size:1.5rem;color:var(--accent);margin-bottom:0.5rem;display:block"></i><h2 style="font-size:1rem;margin-bottom:0.25rem" data-i18n="admin.change_password">修改密码</h2><p class="text-sm text-muted" data-i18n="admin.change_password_desc">修改当前用户密码</p></div></div>
 
-    <div id="passwordModal" class="modal-overlay" style="display:none">
-      <div class="modal">
-        <h2 style="margin-bottom:1rem">修改密码</h2>
-        <form id="passwordForm">
-          <div class="form-group"><label class="form-label">旧密码</label><input type="password" id="oldPassword" class="form-input" required></div>
-          <div class="form-group"><label class="form-label">新密码</label><input type="password" id="newPassword" class="form-input" required minlength="6"></div>
-          <div class="form-group"><label class="form-label">确认新密码</label><input type="password" id="confirmNewPassword" class="form-input" required minlength="6"></div>
-          <div id="pwdError" class="alert alert-error" style="display:none"></div>
-          <div style="display:flex;gap:0.5rem;justify-content:flex-end">
-            <button type="button" class="btn btn-secondary" onclick="hidePasswordModal()">取消</button>
-            <button type="submit" class="btn btn-primary">确认</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+<div id="passwordModal" class="modal-overlay" style="display:none"><div class="modal"><h2 style="margin-bottom:1rem" data-i18n="admin.change_password">修改密码</h2>
+<form id="passwordForm"><div class="form-group"><label class="form-label" data-i18n="admin.old_password">旧密码</label><input type="password" id="oldPassword" class="form-input" required></div>
+<div class="form-group"><label class="form-label" data-i18n="admin.new_password">新密码</label><input type="password" id="newPassword" class="form-input" required minlength="6"></div>
+<div class="form-group"><label class="form-label" data-i18n="admin.confirm_password">确认新密码</label><input type="password" id="confirmNewPassword" class="form-input" required minlength="6"></div>
+<div id="pwdError" class="alert alert-error" style="display:none"></div>
+<div style="display:flex;gap:0.5rem;justify-content:flex-end"><button type="button" class="btn btn-secondary" onclick="hidePasswordModal()" data-i18n="common.cancel">取消</button><button type="submit" class="btn btn-primary" data-i18n="common.confirm">确认</button></div></form></div></div></div>
 
-  <script>
-    if (!requireAdmin()) {}
-    renderNavbar("admin");
-    function exportCSV() { window.open("/api/export/csv","_blank");showToast("正在导出...","info"); }
-    function exportXLSX() { window.open("/api/export/xlsx","_blank");showToast("正在导出...","info"); }
-    function showPasswordModal() { document.getElementById("passwordModal").style.display="flex"; }
-    function hidePasswordModal() { document.getElementById("passwordModal").style.display="none"; }
-    document.getElementById("passwordForm").addEventListener("submit",async(e)=>{
-      e.preventDefault();
-      const op=document.getElementById("oldPassword").value,np=document.getElementById("newPassword").value,cp=document.getElementById("confirmNewPassword").value,err=document.getElementById("pwdError");
-      if(np!==cp){err.textContent="两次输入不一致";err.style.display="block";return;}
-      try{err.style.display="none";await apiPost("/auth/change-password",{old_password:op,new_password:np});hidePasswordModal();showToast("密码已修改","success");document.getElementById("passwordForm").reset();}catch(ex){err.textContent=ex.message||"修改失败";err.style.display="block";}
-    });
-    document.getElementById("passwordModal").addEventListener("click",(e)=>{if(e.target.id==="passwordModal")hidePasswordModal();});
-  </script>
-</body>
-</html>
+<script>if(!requireAdmin()){}
+renderNavbar("admin");applyI18n();
+function exportCSV(){window.open("/api/export/csv","_blank");showToast(t("admin.export_toast"),"info");}
+function exportXLSX(){window.open("/api/export/xlsx","_blank");showToast(t("admin.export_toast"),"info");}
+function showPasswordModal(){document.getElementById("passwordModal").style.display="flex";}
+function hidePasswordModal(){document.getElementById("passwordModal").style.display="none";}
+document.getElementById("passwordForm").addEventListener("submit",async(e)=>{e.preventDefault();const op=document.getElementById("oldPassword").value,np=document.getElementById("newPassword").value,cp=document.getElementById("confirmNewPassword").value,err=document.getElementById("pwdError");if(np!==cp){err.textContent=t("admin.pwd_mismatch");err.style.display="block";return;}try{err.style.display="none";await apiPost("/auth/change-password",{old_password:op,new_password:np});hidePasswordModal();showToast(t("admin.pwd_changed"),"success");document.getElementById("passwordForm").reset();}catch(ex){err.textContent=ex.message;err.style.display="block";}});
+document.getElementById("passwordModal").addEventListener("click",(e)=>{if(e.target.id==="passwordModal")hidePasswordModal();});</script></body></html>
