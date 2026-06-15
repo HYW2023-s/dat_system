@@ -51,9 +51,9 @@
       const password = document.getElementById("password").value;
       const errorMsg = document.getElementById("errorMsg");
       if (!username || !password) { errorMsg.textContent = t("login.error_empty"); errorMsg.style.display = "block"; return; }
+      errorMsg.style.display = "none";
+      const btn = e.target.querySelector("button");
       try {
-        errorMsg.style.display = "none";
-        const btn = e.target.querySelector("button");
         btn.disabled = true; btn.textContent = t("login.logging_in");
         await login(username, password);
         window.location.href = "/test";
