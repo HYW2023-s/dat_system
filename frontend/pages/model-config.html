@@ -10,65 +10,187 @@
 </head>
 <body>
   <nav id="navbar" class="navbar"></nav>
-  <div class="page-container" style="padding-top:2rem;padding-bottom:3rem;max-width:600px;margin:0 auto">
+  <div class="page-container" style="padding-top:2rem;padding-bottom:3rem;max-width:680px;margin:0 auto">
     <a href="/admin" class="btn btn-ghost mb-4" style="padding:0.375rem 0.625rem"><i class="ph ph-arrow-left"></i> 返回</a>
     <h1 style="margin-bottom:1.5rem">Embedding 模型配置</h1>
 
+    <!-- Current model -->
     <div class="card mb-4">
       <h2 class="card-header">当前模型</h2>
-      <div id="currentModelInfo"><div class="spinner"></div></div>
+      <div id="currentInfo"><div class="spinner"></div></div>
     </div>
 
+    <!-- Active models -->
     <div class="card mb-4">
-      <h2 class="card-header">可用模型</h2>
-      <div id="modelsList"><div class="spinner" style="margin:1rem auto"></div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+        <h2 class="card-header" style="margin-bottom:0">已激活的模型</h2>
+      </div>
+      <div id="activeList"><span class="text-muted text-sm">加载中...</span></div>
     </div>
 
+    <!-- Built-in templates -->
     <div class="card mb-4">
-      <h2 class="card-header">API Key 配置</h2>
-      <p class="text-sm text-muted mb-4">API Key 仅用于调用外部 Embedding 服务。</p>
-      <div class="form-group"><label class="form-label">模型</label><select id="apikeyModel" class="form-input"><option value="ali-qwen-v4">阿里百炼 text-embedding-v4</option></select></div>
-      <div class="form-group"><label class="form-label" for="apiKey">API Key</label><input type="password" id="apiKey" class="form-input" placeholder="输入 API Key" autocomplete="off"></div>
-      <div id="apiKeyError" class="alert alert-error" style="display:none"></div>
-      <div id="apiKeySuccess" class="alert alert-success" style="display:none"></div>
-      <button class="btn btn-primary" onclick="saveApiKey()">保存</button>
+      <h2 class="card-header">内置模型模板</h2>
+      <p class="text-sm text-muted mb-4">选择一个模型并填入 API Key 即可激活使用。</p>
+      <div id="templateList"><span class="text-muted text-sm">加载中...</span></div>
     </div>
 
+    <!-- Custom provider -->
+    <div class="card mb-4">
+      <h2 class="card-header">添加自定义模型</h2>
+      <p class="text-sm text-muted mb-4">支持任何兼容 OpenAI API 格式的 Embedding 服务。</p>
+      <form id="customForm">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+          <div class="form-group"><label class="form-label">显示名称</label><input id="cName" class="form-input" placeholder="如：我的模型" required></div>
+          <div class="form-group"><label class="form-label">向量维度</label><input id="cDim" type="number" class="form-input" placeholder="如：1536" min="1" max="8192" required></div>
+        </div>
+        <div class="form-group"><label class="form-label">API 地址</label><input id="cUrl" class="form-input" placeholder="https://api.example.com/v1" required></div>
+        <div class="form-group"><label class="form-label">模型 ID</label><input id="cModel" class="form-input" placeholder="model-name" required></div>
+        <div class="form-group"><label class="form-label">API Key</label><input type="password" id="cKey" class="form-input" placeholder="sk-..." required></div>
+        <div id="customMsg" style="display:none" class="mb-4"></div>
+        <button type="submit" class="btn btn-primary">添加模型</button>
+      </form>
+    </div>
+
+    <!-- Cache -->
     <div class="card">
       <h2 class="card-header">向量缓存</h2>
-      <p class="text-sm text-muted mb-4">通过 API 获取的词向量会自动缓存到本地。</p>
       <div id="cacheStats"><span class="text-muted text-sm">加载中...</span></div>
     </div>
   </div>
 
   <script>
     if (!requireAdmin()) {}
-    async function init(){renderNavbar("admin");await loadModels();await loadCacheStats();}
-    async function loadModels(){
-      try{
-        const d=await apiGet("/models");
-        const active=d.models.find(m=>m.name===d.active_model);
-        document.getElementById("currentModelInfo").innerHTML=active?`
-          <div style="font-size:1.125rem;font-weight:600">${active.description}</div>
-          <div class="text-sm text-muted mt-2">${active.dimension}维 &nbsp;·&nbsp; ${active.is_local?'本地运行':'API调用'}</div>
-        `:`<span class="text-muted">未选择</span>`;
-        document.getElementById("modelsList").innerHTML=d.models.map(m=>`
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 0;border-bottom:1px solid var(--border-light)">
-            <div><strong>${m.description}</strong><div class="text-sm text-muted mt-2">${m.dimension}维 · ${m.is_local?'本地':'API'}</div></div>
-            ${m.name===d.active_model?`<span style="background:var(--accent-light);color:var(--accent);padding:0.375rem 0.75rem;border-radius:var(--radius-md);font-size:0.8125rem;font-weight:500">当前使用</span>`:`<button class="btn btn-secondary" onclick="switchModel('${m.name}')" style="padding:0.25rem 0.625rem;font-size:0.8125rem">切换</button>`}
+
+    async function init() {
+      renderNavbar("admin");
+      await refresh();
+      await loadCache();
+    }
+
+    async function refresh() {
+      try {
+        const d = await apiGet("/models");
+        renderCurrent(d);
+        renderActive(d);
+        renderTemplates(d);
+      } catch (e) { showToast("加载失败", "error"); }
+    }
+
+    function renderCurrent(d) {
+      const m = d.models.find(x => x.name === d.active_model);
+      document.getElementById("currentInfo").innerHTML = m
+        ? `<div style="font-size:1.0625rem;font-weight:600">${m.description}</div><div class="text-sm text-muted mt-2">${m.dimension}维 · ${m.is_local ? '本地运行' : 'API 调用'}</div>`
+        : `<span class="text-muted">无</span>`;
+    }
+
+    function renderActive(d) {
+      const api = d.models.filter(m => !m.is_local);
+      if (api.length === 0) {
+        document.getElementById("activeList").innerHTML = `<span class="text-muted text-sm">暂无已激活的 API 模型（Word2Vec 默认可用）</span>`;
+        document.getElementById("activeList").style.display = "";
+        return;
+      }
+      document.getElementById("activeList").style.display = "";
+      document.getElementById("activeList").innerHTML = api.map(m => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0.625rem 0;border-bottom:1px solid var(--border-light)">
+          <div><strong style="display:block">${m.description}</strong><span class="text-sm text-muted">${m.dimension}维</span></div>
+          <div style="display:flex;gap:0.375rem">
+            ${m.is_active
+              ? `<span style="background:var(--accent-light);color:var(--accent);padding:0.25rem 0.625rem;border-radius:var(--radius-md);font-size:0.8125rem">当前</span>`
+              : `<button class="btn btn-ghost" style="font-size:0.8125rem;padding:0.25rem 0.625rem" onclick="switchTo('${m.name}')">切换</button>`
+            }
+            <button class="btn btn-ghost" style="font-size:0.75rem;color:var(--error);padding:0.25rem" onclick="removeProvider('${m.name}')" title="移除"><i class="ph ph-trash"></i></button>
           </div>
-        `).join("");
-      }catch(e){showToast("加载失败","error");}
+        </div>
+      `).join("");
     }
-    async function switchModel(n){try{await apiPost("/models/switch",{model_name:n});showToast("已切换","success");await loadModels();}catch(e){showToast(e.message,"error");}}
-    async function saveApiKey(){
-      const m=document.getElementById("apikeyModel").value,k=document.getElementById("apiKey").value.trim(),err=document.getElementById("apiKeyError"),ok=document.getElementById("apiKeySuccess");
-      if(!k){err.textContent="请输入API Key";err.style.display="block";ok.style.display="none";return;}
-      try{err.style.display="none";ok.style.display="none";const r=await apiPost("/models/apikey",{model_name:m,api_key:k});ok.textContent=r.message;ok.style.display="block";document.getElementById("apiKey").value="";await loadModels();}catch(ex){err.textContent=ex.message;err.style.display="block";ok.style.display="none";}
+
+    function renderTemplates(d) {
+      const t = d.templates || [];
+      const activeNames = new Set(d.models.map(m => m.name));
+      document.getElementById("templateList").innerHTML = t.map(tmpl => {
+        const isActive = activeNames.has(tmpl.name);
+        return `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:0.625rem 0;border-bottom:1px solid var(--border-light)">
+            <div>
+              <strong style="display:block">${tmpl.description}</strong>
+              <span class="text-sm text-muted">${tmpl.dimension}维 · ${isActive ? '已激活' : '需 API Key'}</span>
+            </div>
+            ${isActive
+              ? `<span style="background:var(--bg-warm);color:var(--text-secondary);padding:0.25rem 0.625rem;border-radius:var(--radius-md);font-size:0.8125rem">已激活</span>`
+              : `<button class="btn btn-secondary" style="font-size:0.8125rem;padding:0.25rem 0.625rem" onclick="showKeyPrompt('${tmpl.kind || tmpl.name}','${tmpl.description}')">激活</button>`
+            }
+          </div>
+        `;
+      }).join("");
     }
-    async function loadCacheStats(){
-      try{const s=await apiGet("/models/cache-stats");document.getElementById("cacheStats").innerHTML=Object.keys(s).length===0?'<span class="text-muted text-sm">缓存为空</span>':Object.entries(s).map(([n,c])=>`<div style="padding:0.5rem 0;border-bottom:1px solid var(--border-light)">${n}：<strong>${c}</strong> 个词向量已缓存</div>`).join("");}catch(e){}
+
+    async function switchTo(name) {
+      try {
+        const r = await apiPost("/models/switch", { model_name: name });
+        showToast(r.message, "success");
+        await refresh();
+      } catch (e) { showToast(e.message, "error"); }
     }
+
+    function showKeyPrompt(kind, desc) {
+      const key = prompt(`输入 API Key 以激活：\n${desc}\n\nAPI Key：`);
+      if (!key) return;
+      activateModel(kind, key);
+    }
+
+    async function activateModel(kind, key) {
+      try {
+        const r = await apiPost("/models/activate", { model_name: kind, api_key: key });
+        showToast(r.message, "success");
+        await refresh();
+      } catch (e) { showToast(e.message, "error"); }
+    }
+
+    async function removeProvider(name) {
+      if (!confirm(`确定移除模型 "${name}"？`)) return;
+      try {
+        const r = await apiPost("/models/delete", { model_name: name });
+        showToast(r.message, "success");
+        await refresh();
+      } catch (e) { showToast(e.message, "error"); }
+    }
+
+    document.getElementById("customForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("cName").value.trim();
+      const url = document.getElementById("cUrl").value.trim();
+      const modelId = document.getElementById("cModel").value.trim();
+      const dim = parseInt(document.getElementById("cDim").value);
+      const key = document.getElementById("cKey").value.trim();
+      const msg = document.getElementById("customMsg");
+
+      try {
+        const r = await apiPost("/models/custom", {
+          name, base_url: url, model_id: modelId, dimension: dim, api_key: key,
+        });
+        msg.className = "alert alert-success";
+        msg.textContent = r.message;
+        msg.style.display = "block";
+        document.getElementById("customForm").reset();
+        await refresh();
+      } catch (ex) {
+        msg.className = "alert alert-error";
+        msg.textContent = ex.message;
+        msg.style.display = "block";
+      }
+    });
+
+    async function loadCache() {
+      try {
+        const s = await apiGet("/models/cache-stats");
+        document.getElementById("cacheStats").innerHTML = Object.keys(s).length === 0
+          ? `<span class="text-muted text-sm">缓存为空</span>`
+          : Object.entries(s).map(([n, c]) => `<div style="padding:0.375rem 0;border-bottom:1px solid var(--border-light)">${n}：<strong>${c}</strong> 个词向量</div>`).join("");
+      } catch (e) {}
+    }
+
     init();
   </script>
 </body>
