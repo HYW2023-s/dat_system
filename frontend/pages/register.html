@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注册 - DAT System</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+</head>
+<body>
+  <div style="min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:1.5rem">
+    <div class="card" style="width:100%;max-width:400px">
+      <div style="text-align:center;margin-bottom:2rem">
+        <div style="font-size:2.5rem;color:var(--accent);margin-bottom:0.5rem">
+          <i class="ph ph-user-plus"></i>
+        </div>
+        <h1 style="font-size:1.5rem">注册账号</h1>
+        <p class="text-muted text-sm mt-2">创建您的 DAT System 账号</p>
+      </div>
+
+      <form id="registerForm">
+        <div class="form-group">
+          <label class="form-label" for="username">用户名</label>
+          <input type="text" id="username" class="form-input" placeholder="请输入用户名" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">密码</label>
+          <input type="password" id="password" class="form-input" placeholder="至少6位字符" required minlength="6">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="confirmPassword">确认密码</label>
+          <input type="password" id="confirmPassword" class="form-input" placeholder="再次输入密码" required minlength="6">
+        </div>
+
+        <div id="errorMsg" class="alert alert-error" style="display:none"></div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%">
+          <i class="ph ph-user-plus"></i> 注册
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-muted mt-4">
+        已有账号？<a href="/login">返回登录</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+      const errorMsg = document.getElementById("errorMsg");
+
+      if (password !== confirmPassword) {
+        errorMsg.textContent = "两次输入的密码不一致";
+        errorMsg.style.display = "block";
+        return;
+      }
+
+      try {
+        errorMsg.style.display = "none";
+        await apiPost("/auth/register", { username, password, confirm_password: confirmPassword });
+        showToast("注册成功，请登录", "success");
+        setTimeout(() => window.location.href = "/login", 1000);
+      } catch (err) {
+        errorMsg.textContent = err.message || "注册失败";
+        errorMsg.style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>

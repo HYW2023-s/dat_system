@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DAT System - 发散性思维测试</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <script>
+    // Redirect based on auth state
+    if (localStorage.getItem("dat_token")) {
+      window.location.href = "/test";
+    } else {
+      window.location.href = "/login";
+    }
+  </script>
+</head>
+<body>
+  <div style="display:flex;align-items:center;justify-content:center;min-height:100dvh">
+    <div class="spinner"></div>
+  </div>
+</body>
+</html>

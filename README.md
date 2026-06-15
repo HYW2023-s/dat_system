@@ -1,211 +1,185 @@
-# DAT系统指南
+# DAT System v2.0
 
-# 使用指南
+Divergent Association Task (发散性思维测试) 系统 — 通过语义距离计算测量发散性思维能力。
 
-## 直接通过公网ip访问系统（目前关闭）
-
-### 一、访问公网ip地址进入系统体验
-
-#### 步骤1: 点击进入网页
-
-请在浏览器中输入地址：
-
->
-
-#### 步骤2: 输入用户名和密码
-
-默认管理员账户：（请勿外传）
-
->用户名:admin
->密码:admin
-
-#### 步骤3: 系统体验
-
-任务介绍：
-
-![image-20240327203310013](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20240327203310013.png)
-
-开始发散性思维能力测试：
-
-![image-20240327203334812](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20240327203334812.png)
-
-查询作答结果：
-
-![image-20240327203353608](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20240327203353608.png)
-
-总体数据分析
-
-![image-20240327203410348](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20240327203410348.png)
-
-管理任务测验时间
-
-![image-20240327203426009](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20240327203426009.png)
-
-批量用户上传
-
-![image-20240327203441859](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20240327203441859.png)
+本系统基于论文 [Using the divergent association task to measure divergent thinking in Chinese elementary school students](https://doi.org/10.1016/j.tsc.2024.101503) (2024, *Thinking Skills and Creativity*) 开发。
 
 ---
 
-## 在Windows环境下的安装步骤
+## 快速开始
 
-### 一、安装所需的Python包（确保Python版本大于3.8）
-
-#### 步骤1: 进入到`dat_django_project`文件目录
-
-打开命令提示符或PowerShell，首先定位到你的`dat_django_project`项目目录。使用`cd`命令可以帮助你进入到相应的文件夹中。例如：
+### 1. 安装
 
 ```bash
-cd path\to\dat_django_project
-```
+# 克隆项目
+git clone https://github.com/HYW2023-s/dat_system.git
+cd dat_system
 
-请将`path\to\dat_django_project`替换成你的实际文件夹路径。
+# 创建虚拟环境（Python >= 3.10）
+python3 -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-#### 步骤2: 创建并激活虚拟环境
-
-为了保持项目的依赖环境干净，我们将使用`virtualenv`创建一个隔离的Python环境。首先，确保你已经安装了`virtualenv`。如果没有，可以通过以下命令安装：
-
-```bash
-pip install virtualenv
-```
-
-安装完成后，创建一个新的虚拟环境：
-
-```bash
-virtualenv 虚拟环境名称
-```
-
-接下来，激活刚创建的虚拟环境：
-
-```bash
-cd 虚拟环境名称
-.\Scripts\activate
-#在Linux环境为
-source bin/activate
-```
-
-#### 步骤3: 安装项目依赖
-
-现在虚拟环境已经激活，你可以安装项目所需的所有依赖包了。确保`requirements.txt`文件位于当前目录下，然后执行以下命令：
-
-```bash
+# 安装依赖
 pip install -r requirements.txt
 ```
 
-#### 步骤4: 运行DAT系统
+### 2. 下载模型文件
 
-安装完所有依赖后，你就可以启动DAT系统了。使用下面的命令来启动Django服务器：
+腾讯 AI 实验室 Word2Vec 模型下载链接已失效，可以通过百度网盘下载（仅限学术用途）：
 
-```bash
-python manage.py runserver 0.0.0.0:8000
-```
+> 链接: https://pan.baidu.com/s/15UETBSiae9yQr4FPN62V9g?pwd=yrxa
+> 提取码: yrxa
 
-这里使用了8000端口，但你可以根据需要选择其他端口。
+下载后将 `w2v.wv` 和 `w2v.wv.vectors.npy` 放入项目 `models/` 目录。
 
-### 二、配置DAT系统
-
-#### 1. 数据库配置
-
-在DAT系统首次运行之前，你需要配置数据库连接。这一步骤通常涉及编辑`settings.py`文件，指定数据库的类型、名称、用户、密码等信息。
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / "db.sqlite3",
-    }
-}
-```
-
-以上是一个使用SQLite数据库的示例配置。根据你的实际需求，你可能需要配置MySQL、PostgreSQL等其他类型的数据库。
-
-#### 2. 迁移数据库
-
-配置数据库后，使用以下命令来创建或更新数据库结构：
+### 3. 启动
 
 ```bash
-python manage.py makemigrations
-python manage.py migrate
+# 启动 Web 服务（默认 http://localhost:8000）
+dat start
+
+# 指定端口
+dat start --port 8080
+
+# 生产模式部署
+dat deploy --port 80
 ```
 
-#### 3. 创建超级用户
+### 4. 登录
 
-为了访问DAT系统的管理界面，你需要创建一个超级用户：
+打开浏览器访问 `http://localhost:8000`，使用默认管理员账号登录：
 
-```bash
-python manage.py createsuperuser
-```
+> 用户名: `admin`
+> 密码: `123456`
 
-按提示输入用户名、电子邮件地址和密码。
-
-#### 4. 请下载模型
-
-由于系统限制，我们只能够上传1024m以内的源代码，但本系统需要使用到腾讯AI实验室所训练的word2vec模型，请根据您的电脑情况，下载200维的word2vec模型。
-
->[Embedding Datasets Download (tencent.com)](https://ai.tencent.com/ailab/nlp/en/download.html)
-
-并通过`deal_model.py`文件，预处理下载下来的word2vec模型，才能够使得系统正常运行。
-
-### 三、访问DAT系统
-
-启动服务器后，打开浏览器并访问`http://localhost:8000`。如果一切设置正确，你将看到DAT系统的首页。
-
-登录管理界面，请访问`http://localhost:8000/admin`，并使用之前创建的超级用户凭据登录。
-
-以上就是在Windows环境下安装和配置DAT系统的基本步骤。希望这能帮助你顺利地完成安装。如果遇到任何问题，不要忘记查看相关文档或寻求社区的帮助。
+**首次登录后请立即修改密码。**
 
 ---
 
-# 项目目录结构
+## CLI 命令
 
-### `dat`目录
+```bash
+# 启动服务
+dat start                            # 默认端口 8000
+dat start --port 8080                # 指定端口
+dat start --host 0.0.0.0 --port 8080 # 指定 host 和端口
 
-- `asgi.py`: ASGI配置，用于异步web服务器。
-- `settings.py`: 项目配置，包含数据库、中间件、模板等设置。
-- `urls.py`: URL声明，相当于网站的目录。
-- `wsgi.py`: WSGI配置，用于Web服务器运行Django项目。
+# 导出实验数据
+dat export                           # 导出 CSV
+dat export --format xlsx             # 导出 Excel
+dat export --output ./export_data    # 指定输出目录
 
-### `dat_app`目录
+# 修改密码
+dat admin reset-password             # 重置管理员密码为 123456
+dat admin reset-password --password 新密码 --username 用户名
 
-- `middleware`:
-
-  - `auth.py`: 自定义认证中间件。
-  - `dynamic_menu.py`: 动态菜单生成中间件。
-
-- `migrations`: 数据库迁移文件。
-
-- `static`: 存放静态文件（CSS、JavaScript、图片等）。
-
-  - `img`: 存放图片文件。
-
-- `utils`:
-
-  - `__init__.py`: 指示此目录为Python包。
-  - `admin.py`: Django admin的配置。
-  - `apps.py`: 应用配置。
-  - `models`: 模型文件夹，请存在模型于此目录。
-    - `deal_model.py`:通过此程序处理模型文件。
-
-  - `tests.py`: 测试代码。
-  - `views.py`: 视图函数定义。
-
-### `static`目录
-
-- 存放项目的全局静态文件。
-
-### `templates`目录
-
-- 存放Django模板文件，如`dat_score.html`、`dat_test.html`等。
-
-### `data`目录
-
-用于存放目前实验提供的数据，仅供参考
-
-### 根目录文件
-
-- `manage.py`: 项目管理工具。
-- `README.md`: 项目说明文档。
-- `requirements.txt`: 项目依赖列表。
+# 生产部署
+dat deploy                           # 部署到 80 端口
+dat deploy --port 8080
+```
 
 ---
 
+## 功能说明
+
+### DAT 发散性思维测试
+
+1. **输入词汇**：在规定时间（默认 4 分钟）内输入 10 个尽可能不相关的名词
+2. **自动计算**：系统通过 Word2Vec 词向量计算词汇之间的语义距离
+3. **查看结果**：获得 DAT 得分、超越百分比、语义距离热力图
+
+### 管理员功能
+
+- **数据分析**：查看所有用户得分的统计分析和可视化图表
+- **用户管理**：批量上传用户（Excel 文件）
+- **任务配置**：调整测试限制时间
+- **数据导出**：导出所有作答记录为 CSV 或 Excel
+
+---
+
+## API 文档
+
+启动服务后访问 `http://localhost:8000/docs` 查看完整 API 文档。
+
+主要接口：
+
+| 方法  | 路径                    | 说明             |
+|-------|------------------------|------------------|
+| POST  | `/api/auth/login`       | 用户登录         |
+| POST  | `/api/auth/register`    | 用户注册         |
+| GET   | `/api/dat/test-config`  | 获取测试配置     |
+| POST  | `/api/dat/calculate`   | 提交词汇计算得分  |
+| GET   | `/api/dat/results`     | 查询作答记录      |
+| GET   | `/api/dat/result/{id}` | 查看记录详情      |
+| GET   | `/api/admin/analysis`  | 数据分析（管理员）|
+| POST  | `/api/admin/upload-users` | 批量上传用户  |
+| GET   | `/api/export/csv`      | 导出 CSV（管理员）|
+| GET   | `/api/export/xlsx`     | 导出 Excel（管理员）|
+
+---
+
+## 项目结构
+
+```
+dat_system/
+├── cli.py                  # CLI 入口 (typer)
+├── backend/                # FastAPI 后端
+│   ├── main.py             # 应用入口 + 生命周期管理
+│   ├── config.py           # 配置管理
+│   ├── database.py         # SQLite + SQLAlchemy
+│   ├── models.py           # 数据模型
+│   ├── routers/
+│   │   ├── auth.py         # 认证路由
+│   │   ├── dat.py          # DAT 核心路由
+│   │   ├── admin.py        # 管理功能路由
+│   │   └── export.py       # 数据导出路由
+│   ├── services/
+│   │   ├── embedding.py    # 词向量加载服务
+│   │   └── dat_calculator.py # DAT 算法（向量化优化）
+│   └── utils/
+│       └── visualization.py # 热力图生成
+├── frontend/               # 前端页面
+│   ├── index.html
+│   ├── css/style.css       # 全局样式
+│   ├── js/api.js           # API 客户端 + 认证
+│   └── pages/              # 页面
+│       ├── login.html
+│       ├── test.html       # DAT 测试页
+│       ├── results.html    # 结果查询
+│       ├── analysis.html   # 数据分析
+│       └── admin/          # 管理面板
+├── models/                 # 模型文件
+│   ├── w2v.wv              # Word2Vec 模型
+│   └── SIMHEI.TTF          # 中文字体（热力图）
+├── data/                   # 数据库文件 (dat.db)
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## 论文引用
+
+如果您在研究中使用了本系统，请引用：
+
+> Ding, G., He, Y., Yi, K., & Li, S. (2024). Using the divergent association task to measure divergent thinking in Chinese elementary school students. *Thinking Skills and Creativity, 52*, 101503.
+
+---
+
+## 技术栈
+
+| 层次     | 技术                                      |
+| -------- | ----------------------------------------- |
+| CLI      | Typer + Rich                              |
+| Web 框架 | FastAPI + Uvicorn                         |
+| 数据库   | SQLite + SQLAlchemy (async)               |
+| 认证     | JWT + bcrypt                              |
+| 前端     | HTML/CSS/JS + Phosphor Icons + ECharts    |
+| 算法     | Gensim (Word2Vec) + NumPy + scikit-learn  |
+| 可视化   | Matplotlib                                |
+
+---
+
+## License
+
+MIT License. 模型文件仅限学术用途。

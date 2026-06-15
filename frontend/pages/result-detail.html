@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>结果详情 - DAT System</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <script src="/js/api.js"></script>
+</head>
+<body>
+  <nav id="navbar" class="navbar"></nav>
+
+  <div class="page-container" style="padding-top:2rem;padding-bottom:3rem;max-width:800px;margin:0 auto">
+    <a href="/results" class="btn btn-ghost mb-4" style="padding:0.5rem 0.75rem">
+      <i class="ph ph-arrow-left"></i> 返回列表
+    </a>
+
+    <div id="content">
+      <div style="text-align:center;padding:4rem">
+        <div class="spinner" style="margin:0 auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    if (!requireAuth()) {}
+
+    async function init() {
+      renderNavbar("results");
+
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+
+      if (!id) {
+        document.getElementById("content").innerHTML = `
+          <div class="alert alert-error">缺少记录 ID</div>
+        `;
+        return;
+      }
+
+      try {
+        const data = await apiGet(`/dat/result/${id}`);
+        renderDetail(data);
+      } catch (err) {
+        document.getElementById("content").innerHTML = `
+          <div class="alert alert-error">加载失败：${err.message}</div>
+        `;
+      }
+    }
+
+    function renderDetail(data) {
+      document.getElementById("content").innerHTML = `
+        <div class="card" style="text-align:center;margin-bottom:1.5rem">
+          <div class="score-label">DAT 得分</div>
+          <div class="score-display" style="margin:0.25rem 0">${data.dat_score}</div>
+          <p class="text-muted text-sm">
+            超越了 <strong>${data.percentage}%</strong> 的用户 &nbsp;|&nbsp;
+            有效词汇：<strong>${data.effective_num}</strong>/10
+          </p>
+        </div>
+
+        <div class="card mb-4">
+          <h2 class="card-header" style="display:flex;align-items:center;gap:0.5rem">
+            <i class="ph ph-text-aa" style="color:var(--accent)"></i> 作答词汇
+          </h2>
+          <div style="display:flex;flex-wrap:wrap;gap:0.5rem">
+            ${data.words.map((w, i) =>
+              w
+                ? `<span style="background:var(--bg-elevated);padding:0.5rem 0.75rem;border-radius:var(--radius-md);font-size:0.9375rem">${i + 1}. ${w}</span>`
+                : `<span style="padding:0.5rem 0.75rem;font-size:0.9375rem;color:var(--text-muted);text-decoration:line-through">${i + 1}. 空</span>`
+            ).join("")}
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <h2 class="card-header" style="display:flex;align-items:center;gap:0.5rem">
+            <i class="ph ph-info" style="color:var(--accent)"></i> 测试信息
+          </h2>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;font-size:0.875rem">
+            <div>
+              <span class="text-muted">用户：</span>
+              <strong>${data.username}</strong>
+            </div>
+            <div>
+              <span class="text-muted">时间：</span>
+              <strong>${new Date(data.create_time).toLocaleString("zh-CN")}</strong>
+            </div>
+            <div>
+              <span class="text-muted">作答耗时：</span>
+              <strong>${data.spend_time || "无"} 秒</strong>
+            </div>
+            <div>
+              <span class="text-muted">限制时间：</span>
+              <strong>${data.limited_time || "无"} 秒</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="text-align:center">
+          <h2 class="card-header" style="display:flex;align-items:center;justify-content:center;gap:0.5rem">
+            <i class="ph ph-chart-scatter" style="color:var(--accent)"></i> 语义距离热力图
+          </h2>
+          ${data.picture_path && !data.picture_path.includes("tips.jpg")
+            ? `<img src="${data.picture_path}" class="heatmap-image" alt="语义距离热力图" style="margin-top:1rem">`
+            : `<p class="text-muted text-sm mt-4">有效词汇不足5个，无法生成热力图</p>`
+          }
+        </div>
+      `;
+    }
+
+    init();
+  </script>
+</body>
+</html>

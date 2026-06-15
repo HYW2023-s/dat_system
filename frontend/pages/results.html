@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>结果查询 - DAT System</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <script src="/js/api.js"></script>
+</head>
+<body>
+  <nav id="navbar" class="navbar"></nav>
+
+  <div class="page-container" style="padding-top:2rem;padding-bottom:3rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem">
+      <h1><i class="ph ph-list-numbers"></i> 作答记录</h1>
+      <a href="/test" class="btn btn-primary">
+        <i class="ph ph-plus"></i> 新建测试
+      </a>
+    </div>
+
+    <!-- Search -->
+    <div id="searchBox" class="card mb-4" style="display:none">
+      <div style="display:flex;gap:0.75rem">
+        <input type="text" id="searchInput" class="form-input" placeholder="搜索用户名..." style="max-width:300px">
+        <button class="btn btn-secondary" onclick="searchRecords()">
+          <i class="ph ph-magnifying-glass"></i> 搜索
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>用户名</th>
+            <th>创建时间</th>
+            <th>DAT 得分</th>
+            <th>有效词数</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="6" style="text-align:center;padding:2rem"><div class="spinner" style="margin:0 auto"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="pagination"></div>
+
+    <!-- Empty state -->
+    <div id="emptyState" class="empty-state" style="display:none">
+      <i class="ph ph-empty"></i>
+      <p>暂无作答记录</p>
+      <a href="/test" class="btn btn-primary mt-4">开始第一次测试</a>
+    </div>
+  </div>
+
+  <script>
+    let currentPage = 1;
+    let totalPages = 1;
+    let searchQuery = "";
+
+    if (!requireAuth()) {}
+
+    async function init() {
+      const user = getUserInfo();
+      renderNavbar("results");
+
+      if (user.isSuperuser) {
+        document.getElementById("searchBox").style.display = "block";
+      }
+
+      await loadResults();
+    }
+
+    async function loadResults() {
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem"><div class="spinner" style="margin:0 auto"></div></td></tr>`;
+
+      try {
+        const data = await apiGet(`/dat/results?page=${currentPage}&page_size=20&search=${encodeURIComponent(searchQuery)}`);
+        totalPages = data.total_pages;
+
+        if (data.items.length === 0) {
+          document.querySelector(".table-container").style.display = "none";
+          document.getElementById("emptyState").style.display = "block";
+          document.getElementById("pagination").innerHTML = "";
+          return;
+        }
+
+        document.querySelector(".table-container").style.display = "block";
+        document.getElementById("emptyState").style.display = "none";
+
+        tbody.innerHTML = data.items.map(r => `
+          <tr>
+            <td>${r.id}</td>
+            <td>${r.username}</td>
+            <td>${new Date(r.create_time).toLocaleString("zh-CN")}</td>
+            <td><strong>${r.dat_score}</strong></td>
+            <td>${r.effective_num}/10</td>
+            <td>
+              <button class="btn btn-ghost" onclick="viewDetail(${r.id})" style="padding:0.25rem 0.5rem;font-size:0.8125rem">
+                <i class="ph ph-eye"></i> 查看
+              </button>
+            </td>
+          </tr>
+        `).join("");
+
+        renderPagination();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--error);padding:2rem">加载失败：${err.message}</td></tr>`;
+      }
+    }
+
+    function renderPagination() {
+      const pag = document.getElementById("pagination");
+      let html = "";
+
+      html += `<button onclick="goPage(${currentPage - 1})" ${currentPage <= 1 ? "disabled" : ""}><i class="ph ph-caret-left"></i></button>`;
+
+      for (let p = 1; p <= totalPages; p++) {
+        if (totalPages > 15 && p > 3 && p < totalPages - 2 && p !== currentPage && Math.abs(p - currentPage) > 2) {
+          if (p === 4) html += `<button disabled>...</button>`;
+          continue;
+        }
+        html += `<button class="${p === currentPage ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`;
+      }
+
+      html += `<button onclick="goPage(${currentPage + 1})" ${currentPage >= totalPages ? "disabled" : ""}><i class="ph ph-caret-right"></i></button>`;
+
+      pag.innerHTML = html;
+    }
+
+    function goPage(p) {
+      if (p < 1 || p > totalPages) return;
+      currentPage = p;
+      loadResults();
+    }
+
+    function searchRecords() {
+      searchQuery = document.getElementById("searchInput").value.trim();
+      currentPage = 1;
+      loadResults();
+    }
+
+    function viewDetail(id) {
+      window.location.href = `/result?id=${id}`;
+    }
+
+    document.getElementById("searchInput")?.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") searchRecords();
+    });
+
+    init();
+  </script>
+</body>
+</html>

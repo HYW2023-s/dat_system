@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>任务介绍 - DAT System</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <script src="/js/api.js"></script>
+</head>
+<body>
+  <nav id="navbar" class="navbar"></nav>
+
+  <div class="page-container" style="padding-top:3rem;padding-bottom:4rem">
+    <section class="section" style="text-align:center">
+      <div style="font-size:2.5rem;color:var(--accent);margin-bottom:1rem">
+        <i class="ph ph-brain"></i>
+      </div>
+      <h1 style="font-size:2rem;margin-bottom:0.5rem">发散性思维任务（DAT）</h1>
+      <p class="text-muted" style="max-width:600px;margin:0 auto">
+        Divergent Association Task - 通过语义距离测量发散性思维能力
+      </p>
+    </section>
+
+    <section class="section">
+      <div class="card mb-8">
+        <h2 class="card-header" style="display:flex;align-items:center;gap:0.5rem">
+          <i class="ph ph-info" style="color:var(--accent)"></i> 任务说明
+        </h2>
+        <div style="line-height:1.8;color:var(--text-secondary)">
+          <p class="mb-4">
+            <strong>发散性思维</strong>是创造性思维的核心组成部分，指个体在面对开放性问题时，
+            产生多种不同想法和解决方案的能力。
+          </p>
+          <p class="mb-4">
+            <strong>发散性关联任务（DAT）</strong>是一种客观、高效的测量方法。
+            您只需在限定时间内给出<strong>10个互不相关的名词</strong>，
+            系统将通过计算这些词之间的语义距离来评估您的发散性思维水平。
+          </p>
+          <p>
+            语义距离越远，说明您产生的词汇越具多样性，发散性思维水平越高。
+          </p>
+        </div>
+      </div>
+
+      <div class="card mb-8">
+        <h2 class="card-header" style="display:flex;align-items:center;gap:0.5rem">
+          <i class="ph ph-list-checks" style="color:var(--accent)"></i> 操作步骤
+        </h2>
+        <div style="display:flex;flex-direction:column;gap:1.25rem">
+          <div style="display:flex;gap:1rem;align-items:flex-start">
+            <div style="background:var(--accent-light);color:var(--accent);border-radius:50%;width:2rem;height:2rem;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">1</div>
+            <div>
+              <strong>点击"开始测试"</strong>
+              <p class="text-sm text-muted mt-2">进入测试页面，系统将开始计时</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:1rem;align-items:flex-start">
+            <div style="background:var(--accent-light);color:var(--accent);border-radius:50%;width:2rem;height:2rem;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">2</div>
+            <div>
+              <strong>输入10个名词</strong>
+              <p class="text-sm text-muted mt-2">在限定时间内（默认4分钟），输入10个尽可能不相关的名词</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:1rem;align-items:flex-start">
+            <div style="background:var(--accent-light);color:var(--accent);border-radius:50%;width:2rem;height:2rem;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">3</div>
+            <div>
+              <strong>提交并查看结果</strong>
+              <p class="text-sm text-muted mt-2">提交后系统自动计算得分，可查看语义距离热力图</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-header" style="display:flex;align-items:center;gap:0.5rem">
+          <i class="ph ph-lightbulb" style="color:var(--accent)"></i> 提示
+        </h2>
+        <ul style="color:var(--text-secondary);padding-left:1.25rem;display:flex;flex-direction:column;gap:0.5rem">
+          <li>请确保输入的都是<strong>名词</strong>，而不是动词、形容词或其他词性</li>
+          <li>词汇之间的差距越大越好，避免输入同类词汇（如"苹果"和"香蕉"）</li>
+          <li>某些词可能不在词库中，系统会自动跳过无效词汇</li>
+          <li>至少需要5个有效词汇才能生成热力图</li>
+        </ul>
+      </div>
+    </section>
+
+    <div style="text-align:center;margin-top:2rem">
+      <a href="/test" class="btn btn-primary" style="font-size:1rem;padding:0.75rem 2rem">
+        <i class="ph ph-play"></i> 开始测试
+      </a>
+    </div>
+  </div>
+
+  <script>
+    if (!requireAuth()) {}
+    else { renderNavbar("introduction"); }
+  </script>
+</body>
+</html>

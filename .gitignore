@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+dist/
+
+# Database
+data/dat.db
+
+# Generated images
+frontend/assets/img/thescoreis*.jpg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Matplotlib
+*.matplotlib/
+
+# Claude
+.claude/

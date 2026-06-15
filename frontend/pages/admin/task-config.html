@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>任务配置 - DAT System</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <script src="/js/api.js"></script>
+</head>
+<body>
+  <nav id="navbar" class="navbar"></nav>
+
+  <div class="page-container" style="padding-top:2rem;padding-bottom:3rem;max-width:500px;margin:0 auto">
+    <a href="/admin" class="btn btn-ghost mb-4" style="padding:0.5rem 0.75rem">
+      <i class="ph ph-arrow-left"></i> 返回管理
+    </a>
+
+    <h1 style="margin-bottom:2rem"><i class="ph ph-clock"></i> 任务时间配置</h1>
+
+    <div class="card">
+      <h2 class="card-header">DAT 测试限制时间</h2>
+      <form id="configForm">
+        <div class="form-group">
+          <label class="form-label" for="limitedTime">限制时间（秒）</label>
+          <input type="number" id="limitedTime" class="form-input" min="10" max="3600" required>
+          <p class="form-hint">建议范围：60-600秒（1-10分钟），默认240秒（4分钟）</p>
+        </div>
+
+        <div id="configError" class="alert alert-error" style="display:none"></div>
+        <div id="configSuccess" class="alert alert-success" style="display:none"></div>
+
+        <button type="submit" class="btn btn-primary">
+          <i class="ph ph-floppy-disk"></i> 保存配置
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    if (!requireAdmin()) {}
+
+    async function init() {
+      renderNavbar("admin");
+
+      try {
+        const data = await apiGet("/dat/limited-time");
+        document.getElementById("limitedTime").value = data.limited_time;
+      } catch (err) {
+        showToast("获取配置失败", "error");
+      }
+    }
+
+    document.getElementById("configForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const limitedTime = parseInt(document.getElementById("limitedTime").value);
+      const errorEl = document.getElementById("configError");
+      const successEl = document.getElementById("configSuccess");
+
+      if (limitedTime < 10 || limitedTime > 3600) {
+        errorEl.textContent = "时间范围应在10-3600秒之间";
+        errorEl.style.display = "block";
+        return;
+      }
+
+      errorEl.style.display = "none";
+      successEl.style.display = "none";
+
+      try {
+        await apiPut("/admin/task-time", { limited_time: limitedTime });
+        successEl.textContent = `限制时间已更新为 ${limitedTime} 秒（${Math.floor(limitedTime/60)}分${limitedTime%60}秒）`;
+        successEl.style.display = "block";
+      } catch (err) {
+        errorEl.textContent = err.message || "保存失败";
+        errorEl.style.display = "block";
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
