@@ -231,6 +231,63 @@ async def get_result_detail(
     }
 
 
+@router.get("/result/{record_id}/heatmap-data")
+async def get_heatmap_data(
+    record_id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get heatmap matrix data for a record (for ECharts frontend rendering)."""
+    query = select(DatTest).where(DatTest.id == record_id)
+    result = await db.execute(query)
+    record = result.scalar_one_or_none()
+
+    if record is None:
+        raise HTTPException(status_code=404, detail="Record not found")
+
+    if not current_user.is_superuser and record.username != current_user.username:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    # Collect valid words
+    all_words = [
+        record.word1, record.word2, record.word3, record.word4, record.word5,
+        record.word6, record.word7, record.word8, record.word9, record.word10,
+    ]
+    non_empty = [w for w in all_words if w]
+
+    from backend.services.embedding import get_provider
+    import numpy as np
+    from sklearn.metrics.pairwise import cosine_similarity
+
+    w2v = get_provider("word2vec")
+    if w2v is None or w2v.model is None:
+        return {"words": non_empty, "matrix": []}
+
+    # Filter words in vocabulary
+    valid_words = [w for w in non_empty if w in w2v.model]
+
+    if len(valid_words) < 2:
+        return {"words": valid_words, "matrix": []}
+
+    # Compute distance matrix
+    vectors = np.stack([w2v.model[w] for w in valid_words])
+    sim_matrix = cosine_similarity(vectors)
+    dist_matrix = (1 - sim_matrix) * 100
+
+    # Build lower-triangle matrix for ECharts heatmap
+    # ECharts uses [x, y, value] format
+    heatmap_data = []
+    n = len(valid_words)
+    for i in range(n):
+        for j in range(i + 1, n):
+            heatmap_data.append([j, i, round(float(dist_matrix[i, j]), 1)])
+
+    return {
+        "words": valid_words,
+        "matrix": heatmap_data,
+    }
+
+
 @router.get("/limited-time")
 async def get_limited_time(db: AsyncSession = Depends(get_db)):
     """Get the current DAT test time limit."""

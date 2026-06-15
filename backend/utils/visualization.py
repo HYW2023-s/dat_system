@@ -1,109 +1,131 @@
-"""MATPLOTLIB heatmap visualization for DAT results."""
+"""Heatmap visualization for DAT results - matplotlib fallback only."""
 
 import logging
 from datetime import datetime
 from pathlib import Path
 
 import matplotlib
-import matplotlib.colors as colors
 import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 import numpy as np
 
 from backend.config import STATIC_DIR, FONT_PATH
-from backend.services.embedding import get_active_provider
 
 logger = logging.getLogger(__name__)
 
-# Configure matplotlib for Chinese support
 matplotlib.use("Agg")
 
-# Try to find a suitable Chinese font
-_chinese_font = None
+# Chinese font setup
 _font_candidates = ["STHeiti", "Heiti TC", "PingFang HK", "Lantinghei SC", "Songti SC", "STFangsong"]
-
 font_path = Path(FONT_PATH)
 if font_path.exists():
     try:
         fm.fontManager.addfont(str(font_path))
-        plt.rcParams["font.family"] = "sans-serif"
-        plt.rcParams["font.sans-serif"] = _font_candidates
-        plt.rcParams["axes.unicode_minus"] = False
     except Exception:
-        plt.rcParams["font.sans-serif"] = _font_candidates
-        plt.rcParams["axes.unicode_minus"] = False
-else:
-    plt.rcParams["font.sans-serif"] = _font_candidates
-    plt.rcParams["axes.unicode_minus"] = False
+        pass
+
+plt.rcParams["font.sans-serif"] = _font_candidates
+plt.rcParams["axes.unicode_minus"] = False
 
 
 def generate_heatmap(valid_words: list, dat_score: int) -> str:
     """
-    Generate a heatmap image for the DAT result.
+    Generate a clean heatmap image as fallback (ECharts is the primary renderer).
 
-    Args:
-        valid_words: list of valid words
-        dat_score: the computed DAT score
-
-    Returns:
-        relative URL path to the generated image (e.g., /assets/img/...)
+    Uses the 'RdYlBu_r' colormap: blue=close, red=far — intuitive for distance.
     """
     n = len(valid_words)
 
     if n < 5:
         return "/assets/img/tips.jpg"
 
-    # Get vectors - prefer Word2Vec for visualization (always available, no API cost)
     from backend.services.embedding import get_provider
+    from sklearn.metrics.pairwise import cosine_similarity
+
     w2v = get_provider("word2vec")
-    if w2v is None:
-        logger.warning("Word2Vec provider not available for heatmap")
+    if w2v is None or w2v.model is None:
         return "/assets/img/tips.jpg"
 
+    # Build distance matrix
     vectors = []
     for w in valid_words:
-        # Use sync method for Word2Vec
-        v = w2v.model[w] if w2v.model and w in w2v.model else None
-        if v is not None:
-            vectors.append(v)
-        else:
-            # Word not in vocab - should not happen since we already filtered
+        v = w2v.model[w] if w in w2v.model else None
+        if v is None:
             return "/assets/img/tips.jpg"
+        vectors.append(v)
 
     vectors = np.stack(vectors)
-    from sklearn.metrics.pairwise import cosine_similarity
     sim_matrix = cosine_similarity(vectors)
-    dist_matrix = (1 - sim_matrix) * 100  # Scale to 0-100 like original
+    dist_matrix = (1 - sim_matrix) * 100
 
-    # Mask upper triangle and diagonal for display
-    mask = np.triu(np.ones_like(dist_matrix), k=1)
-    display_matrix = np.where(mask == 1, 0, dist_matrix)
-
-    # Plot
-    plt.figure(dpi=600)
-    plt.xticks(range(n), labels=valid_words, rotation=60)
-    plt.yticks(range(n), labels=valid_words)
-
+    # Build a full symmetric matrix for display
+    # Lower triangle = data, upper + diagonal = NaN (won't be colored)
+    display = np.full((n, n), np.nan)
     for i in range(n):
-        for j in range(n):
-            if i > j:  # Only lower triangle
-                plt.text(j, i, int(display_matrix[i, j]),
-                         ha="center", va="center", color="w", fontsize=8)
+        for j in range(i + 1, n):
+            display[i, j] = dist_matrix[i, j]
+            display[j, i] = dist_matrix[i, j]
 
-    cmap = colors.ListedColormap([
-        "azure", "paleturquoise", "lightskyblue", "cornflowerblue", "royalblue"
-    ])
-    plt.imshow(display_matrix, cmap=cmap)
+    # Create figure with clean proportions
+    figsize = max(6, n * 0.7)
+    fig, ax = plt.subplots(figsize=(figsize, figsize), dpi=150)
+
+    # Use a proper diverging colormap: blue (close) → white → red (far)
+    cmap = plt.cm.RdYlBu_r
+
+    # Mask NaN cells (diagonal) with white
+    cmap.set_bad("white")
+
+    im = ax.imshow(display, cmap=cmap, aspect="equal", vmin=0, vmax=100)
+
+    # Add value text in each cell (lower triangle only)
+    for i in range(n):
+        for j in range(i + 1, n):
+            val = display[i, j]
+            # Dark text on light bg, light text on dark bg
+            text_color = "white" if val > 50 else "#1a1a2e"
+            ax.text(j, i, f"{val:.0f}",
+                    ha="center", va="center",
+                    fontsize=10, fontweight="bold",
+                    color=text_color)
+            # Mirror value in upper triangle
+            ax.text(i, j, f"{val:.0f}",
+                    ha="center", va="center",
+                    fontsize=10, fontweight="bold",
+                    color=text_color)
+
+    # Ticks and labels
+    ax.set_xticks(range(n))
+    ax.set_yticks(range(n))
+    ax.set_xticklabels(valid_words, fontsize=11, rotation=30, ha="right")
+    ax.set_yticklabels(valid_words, fontsize=11)
+
+    # Clean styling
+    ax.tick_params(top=False, bottom=False, left=False, right=False)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    # Colorbar
+    cbar = fig.colorbar(im, ax=ax, shrink=0.82, pad=0.02)
+    cbar.set_label("语义距离", fontsize=11)
+    cbar.ax.tick_params(labelsize=9)
+
+    # Title
+    ax.set_title(
+        f"DAT 语义距离矩阵       得分: {dat_score}",
+        fontsize=13, fontweight="bold", pad=12,
+    )
+
+    plt.tight_layout()
 
     # Save
     now = datetime.now()
     timestamp = now.timestamp()
-    filename = f"thescoreis{dat_score}{timestamp}.jpg"
-
+    filename = f"heatmap_{dat_score}_{timestamp:.0f}.png"
     img_dir = Path(STATIC_DIR) / "assets" / "img"
     img_dir.mkdir(parents=True, exist_ok=True)
     filepath = img_dir / filename
-    plt.savefig(str(filepath))
+    plt.savefig(str(filepath), bbox_inches="tight", facecolor="white")
     plt.close()
 
     return f"/assets/img/{filename}"

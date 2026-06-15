@@ -6,12 +6,13 @@
   <title>结果详情 - DAT System</title>
   <link rel="stylesheet" href="/css/style.css">
   <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
   <script src="/js/api.js"></script>
 </head>
 <body>
   <nav id="navbar" class="navbar"></nav>
 
-  <div class="page-container" style="padding-top:2rem;padding-bottom:3rem;max-width:800px;margin:0 auto">
+  <div class="page-container" style="padding-top:2rem;padding-bottom:3rem;max-width:900px;margin:0 auto">
     <a href="/results" class="btn btn-ghost mb-4" style="padding:0.5rem 0.75rem">
       <i class="ph ph-arrow-left"></i> 返回列表
     </a>
@@ -28,32 +29,47 @@
 
     async function init() {
       renderNavbar("results");
-
       const params = new URLSearchParams(window.location.search);
       const id = params.get("id");
-
       if (!id) {
-        document.getElementById("content").innerHTML = `
-          <div class="alert alert-error">缺少记录 ID</div>
-        `;
+        document.getElementById("content").innerHTML = `<div class="alert alert-error">缺少记录 ID</div>`;
         return;
       }
-
       try {
         const data = await apiGet(`/dat/result/${id}`);
-        renderDetail(data);
+        renderDetail(data, id);
       } catch (err) {
-        document.getElementById("content").innerHTML = `
-          <div class="alert alert-error">加载失败：${err.message}</div>
-        `;
+        document.getElementById("content").innerHTML = `<div class="alert alert-error">加载失败：${err.message}</div>`;
       }
     }
 
-    function renderDetail(data) {
+    async function renderDetail(data, recordId) {
+      const scoreColor = data.dat_score > 60 ? 'var(--success)' :
+                        data.dat_score > 40 ? 'var(--accent)' : 'var(--warning)';
+
+      let heatmapHTML = `<p class="text-muted text-sm mt-4">有效词汇不足，无法生成热力图</p>`;
+
+      // Try ECharts first
+      try {
+        const heatmapData = await apiGet(`/dat/result/${recordId}/heatmap-data`);
+        if (heatmapData.words && heatmapData.words.length >= 2) {
+          heatmapHTML = `
+            <div id="heatmapChart" style="width:100%;height:${Math.max(360, heatmapData.words.length * 55)}px;margin-top:1rem"></div>
+          `;
+          // Render ECharts after DOM update
+          setTimeout(() => renderEChartsHeatmap(heatmapData), 100);
+        }
+      } catch (e) {
+        // Fallback to matplotlib image
+        if (data.picture_path && !data.picture_path.includes("tips.jpg")) {
+          heatmapHTML = `<img src="${data.picture_path}" class="heatmap-image" alt="语义距离热力图" style="margin-top:1rem">`;
+        }
+      }
+
       document.getElementById("content").innerHTML = `
         <div class="card" style="text-align:center;margin-bottom:1.5rem">
           <div class="score-label">DAT 得分</div>
-          <div class="score-display" style="margin:0.25rem 0">${data.dat_score}</div>
+          <div class="score-display" style="margin:0.25rem 0;color:${scoreColor}">${data.dat_score}</div>
           <p class="text-muted text-sm">
             超越了 <strong>${data.percentage}%</strong> 的用户 &nbsp;|&nbsp;
             有效词汇：<strong>${data.effective_num}</strong>/10
@@ -78,22 +94,10 @@
             <i class="ph ph-info" style="color:var(--accent)"></i> 测试信息
           </h2>
           <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;font-size:0.875rem">
-            <div>
-              <span class="text-muted">用户：</span>
-              <strong>${data.username}</strong>
-            </div>
-            <div>
-              <span class="text-muted">时间：</span>
-              <strong>${new Date(data.create_time).toLocaleString("zh-CN")}</strong>
-            </div>
-            <div>
-              <span class="text-muted">作答耗时：</span>
-              <strong>${data.spend_time || "无"} 秒</strong>
-            </div>
-            <div>
-              <span class="text-muted">限制时间：</span>
-              <strong>${data.limited_time || "无"} 秒</strong>
-            </div>
+            <div><span class="text-muted">用户：</span><strong>${data.username}</strong></div>
+            <div><span class="text-muted">时间：</span><strong>${new Date(data.create_time).toLocaleString("zh-CN")}</strong></div>
+            <div><span class="text-muted">作答耗时：</span><strong>${data.spend_time || "无"} 秒</strong></div>
+            <div><span class="text-muted">限制时间：</span><strong>${data.limited_time || "无"} 秒</strong></div>
           </div>
         </div>
 
@@ -101,12 +105,126 @@
           <h2 class="card-header" style="display:flex;align-items:center;justify-content:center;gap:0.5rem">
             <i class="ph ph-chart-scatter" style="color:var(--accent)"></i> 语义距离热力图
           </h2>
-          ${data.picture_path && !data.picture_path.includes("tips.jpg")
-            ? `<img src="${data.picture_path}" class="heatmap-image" alt="语义距离热力图" style="margin-top:1rem">`
-            : `<p class="text-muted text-sm mt-4">有效词汇不足5个，无法生成热力图</p>`
-          }
+          <p class="text-sm text-muted" style="margin-top:0.25rem">
+            <span style="display:inline-block;width:12px;height:12px;background:#313695;border-radius:2px;vertical-align:middle;margin-right:4px"></span> 距离远
+            <span style="display:inline-block;width:12px;height:12px;background:#fee090;border-radius:2px;vertical-align:middle;margin:0 4px"></span> 中等
+            <span style="display:inline-block;width:12px;height:12px;background:#a50026;border-radius:2px;vertical-align:middle;margin-left:4px"></span> 距离近
+          </p>
+          ${heatmapHTML}
         </div>
       `;
+    }
+
+    function renderEChartsHeatmap(data) {
+      const dom = document.getElementById("heatmapChart");
+      if (!dom) return;
+
+      const chart = echarts.init(dom);
+      const words = data.words;
+      const matrixData = data.matrix;
+
+      // Build full symmetric matrix for xAxis/yAxis data mapping
+      // ECharts heatmap: [xIndex, yIndex, value]
+      const fullData = [];
+      for (const item of matrixData) {
+        // item = [x, y, value] where x > y (lower triangle)
+        fullData.push([item[0], item[1], item[2]]);
+        // Mirror to upper triangle
+        fullData.push([item[1], item[0], item[2]]);
+      }
+
+      chart.setOption({
+        tooltip: {
+          position: "top",
+          formatter: (params) => {
+            const xWord = words[params.value[0]];
+            const yWord = words[params.value[1]];
+            const val = params.value[2];
+            return `<strong>${xWord}</strong> ↔ <strong>${yWord}</strong><br/>语义距离: <strong>${val}</strong>`;
+          },
+        },
+        grid: {
+          left: "12%",
+          right: "8%",
+          top: "3%",
+          bottom: "12%",
+        },
+        xAxis: {
+          type: "category",
+          data: words,
+          splitArea: { show: true },
+          axisLabel: {
+            rotate: 30,
+            fontSize: 12,
+            fontWeight: "bold",
+            color: "#52525b",
+          },
+        },
+        yAxis: {
+          type: "category",
+          data: words,
+          splitArea: { show: true },
+          axisLabel: {
+            fontSize: 12,
+            fontWeight: "bold",
+            color: "#52525b",
+          },
+        },
+        visualMap: {
+          min: 0,
+          max: 100,
+          calculable: true,
+          orient: "horizontal",
+          left: "center",
+          bottom: "1%",
+          inRange: {
+            color: [
+              "#a50026",  // dark red  = very close
+              "#d73027",
+              "#f46d43",
+              "#fdae61",
+              "#fee090",  // yellow   = medium
+              "#e0f3f8",
+              "#abd9e9",
+              "#74add1",
+              "#4575b4",
+              "#313695",  // dark blue = very far
+            ],
+          },
+          text: ["远", "近"],
+          textStyle: { color: "#52525b" },
+        },
+        series: [
+          {
+            name: "语义距离",
+            type: "heatmap",
+            data: fullData,
+            label: {
+              show: true,
+              color: "#1a1a2e",
+              fontSize: 11,
+              fontWeight: "bold",
+              formatter: (params) => {
+                const v = params.value[2];
+                // Dark text on light bg, light text on dark
+                return v > 60 || v < 30 ? "" : String(Math.round(v));
+              },
+            },
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowColor: "rgba(0,0,0,0.3)",
+              },
+            },
+            itemStyle: {
+              borderColor: "#ffffff",
+              borderWidth: 2,
+            },
+          },
+        ],
+      });
+
+      window.addEventListener("resize", () => chart.resize());
     }
 
     init();
