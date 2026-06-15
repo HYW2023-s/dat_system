@@ -194,6 +194,11 @@
   B("analysis.min", "最低分", "Minimum");
   B("analysis.median", "中位数", "Median");
   B("analysis.std", "标准差", "Std Dev");
+  B("analysis.bar_title", "得分分布", "Score Distribution");
+  B("analysis.box_title", "箱型图", "Box Plot");
+  B("analysis.violin_title", "密度分布", "Density");
+  B("analysis.scatter_title", "得分散点", "Score Scatter");
+  B("analysis.cumulative_title", "累积分布", "Cumulative Distribution");
   B("analysis.load_failed", "加载失败", "Failed to load");
 
   // ====== ADMIN ======

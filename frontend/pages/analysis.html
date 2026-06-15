@@ -5,9 +5,25 @@
 <body><nav id="navbar" class="navbar"></nav>
 <div class="page-container" style="padding-top:2rem;padding-bottom:3rem"><h1 style="margin-bottom:1.5rem" data-i18n="analysis.title">数据分析</h1>
 <div id="statsCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;margin-bottom:2rem"></div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem"><div class="card"><h2 class="card-header" data-i18n="analysis.bar_title">得分分布</h2><div id="barChart" style="height:320px"></div></div><div class="card"><h2 class="card-header" data-i18n="analysis.box_title">箱型图</h2><div id="boxChart" style="height:320px"></div></div></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+<div class="card"><h2 class="card-header" data-i18n="analysis.bar_title">得分分布</h2><div id="barChart" style="height:300px"></div></div>
+<div class="card"><h2 class="card-header" data-i18n="analysis.box_title">箱型图</h2><div id="boxChart" style="height:300px"></div></div>
+<div class="card"><h2 class="card-header" data-i18n="analysis.violin_title">密度分布</h2><div id="densityChart" style="height:300px"></div></div>
+<div class="card"><h2 class="card-header" data-i18n="analysis.cumulative_title">累积分布</h2><div id="cumulativeChart" style="height:300px"></div></div>
+</div></div>
 <script>if(!requireAdmin()){}
-async function init(){renderNavbar("analysis");applyI18n();try{const d=await apiGet("/admin/analysis");renderStats(d.stats);renderCharts(d.distribution,d.boxplot_data);}catch(e){document.querySelector(".page-container").innerHTML='<div class="alert alert-error">'+t("analysis.load_failed")+'</div>';}}
+async function init(){renderNavbar("analysis");applyI18n();try{const d=await apiGet("/admin/analysis");renderStats(d.stats);renderCharts(d);}catch(e){document.querySelector(".page-container").innerHTML='<div class="alert alert-error">'+t("analysis.load_failed")+'</div>';}}
 function renderStats(s){const cards=[{l:"analysis.sample_count",v:s.count},{l:"analysis.avg",v:s.avg},{l:"analysis.max",v:s.max},{l:"analysis.min",v:s.min},{l:"analysis.median",v:s.median},{l:"analysis.std",v:s.std}];document.getElementById("statsCards").innerHTML=cards.map(c=>'<div class="card" style="text-align:center"><div class="score-label">'+t(c.l)+'</div><div style="font-size:1.5rem;font-weight:700;color:var(--text-primary);margin:0.25rem 0">'+c.v+'</div></div>').join("");}
-function renderCharts(dist,box){const bar=echarts.init(document.getElementById("barChart"));bar.setOption({tooltip:{trigger:"axis"},grid:{left:"3%",right:"4%",bottom:"3%",containLabel:true},xAxis:{type:"category",data:Object.keys(dist),axisLabel:{color:"#6b5e4a"}},yAxis:{type:"value"},series:[{data:Object.values(dist),type:"bar",itemStyle:{color:"#b8753e"}}]});const bc=echarts.init(document.getElementById("boxChart"));bc.setOption({tooltip:{trigger:"item"},grid:{left:"3%",right:"4%",bottom:"3%",containLabel:true},xAxis:{type:"category",data:["DAT"]},yAxis:{type:"value"},series:[{type:"boxplot",data:[box.scores],itemStyle:{color:"#b8753e"}}]});window.addEventListener("resize",()=>{bar.resize();bc.resize();});}
+function renderCharts(d){
+const amber="#b8753e",accent="#4f46e5";
+// Bar chart
+echarts.init(document.getElementById("barChart")).setOption({tooltip:{trigger:"axis"},grid:{left:"3%",right:"4%",bottom:"3%",containLabel:true},xAxis:{type:"category",data:Object.keys(d.distribution),axisLabel:{color:"#6b5e4a"}},yAxis:{type:"value"},series:[{data:Object.values(d.distribution),type:"bar",itemStyle:{color:amber}}]});
+// Box plot
+echarts.init(document.getElementById("boxChart")).setOption({tooltip:{trigger:"item"},grid:{left:"3%",right:"4%",bottom:"3%",containLabel:true},xAxis:{type:"category",data:["DAT"]},yAxis:{type:"value"},series:[{type:"boxplot",data:[d.boxplot_data.scores],itemStyle:{color:amber}}]});
+// Density
+echarts.init(document.getElementById("densityChart")).setOption({tooltip:{trigger:"axis"},grid:{left:"3%",right:"4%",bottom:"3%",containLabel:true},xAxis:{type:"value",axisLabel:{color:"#6b5e4a"}},yAxis:{type:"value",show:false},series:[{data:d.density_data.x.map((x,i)=>[x,d.density_data.y[i]]),type:"line",smooth:true,showSymbol:false,lineStyle:{color:accent,width:2},areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:"rgba(79,70,229,0.3)"},{offset:1,color:"rgba(79,70,229,0.02)"}])}}]});
+// Cumulative
+echarts.init(document.getElementById("cumulativeChart")).setOption({tooltip:{trigger:"axis"},grid:{left:"3%",right:"4%",bottom:"3%",containLabel:true},xAxis:{type:"value",axisLabel:{color:"#6b5e4a"}},yAxis:{type:"value",axisLabel:{formatter:p=>(p*100).toFixed(0)+"%"}},series:[{data:d.cumulative_data.x.map((x,i)=>[x,d.cumulative_data.y[i]]),type:"line",smooth:true,showSymbol:false,lineStyle:{color:accent,width:2},areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:"rgba(79,70,229,0.25)"},{offset:1,color:"rgba(79,70,229,0.02)"}])}}]});
+window.addEventListener("resize",()=>{document.querySelectorAll(".card [id$=Chart]").forEach(el=>{const c=echarts.getInstanceByDom(el);c&&c.resize();});});
+}
 init();</script></body></html>

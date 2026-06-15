@@ -180,10 +180,41 @@ async def get_analysis_data(
         "scores": sorted([int(s) for s in scores]),
     }
 
+    # KDE / density data: gaussian kernel density estimate
+    from scipy.stats import gaussian_kde
+    kde_x = np.linspace(max(0, scores_arr.min() - 10), min(100, scores_arr.max() + 10), 200)
+    try:
+        kde = gaussian_kde(scores_arr)
+        kde_y = kde(kde_x).tolist()
+    except Exception:
+        kde_y = [0] * len(kde_x)
+
+    density_data = {
+        "x": kde_x.tolist(),
+        "y": kde_y,
+    }
+
+    # Cumulative distribution (for ECDF)
+    sorted_scores = np.sort(scores_arr)
+    cumulative_y = (np.arange(1, len(sorted_scores) + 1) / len(sorted_scores)).tolist()
+    cumulative_data = {
+        "x": sorted_scores.tolist(),
+        "y": cumulative_y,
+    }
+
+    # Scatter data: (index, score) to show distribution
+    scatter_data = {
+        "x": list(range(len(scores))),
+        "y": sorted([int(s) for s in scores]),
+    }
+
     return {
         "stats": stats,
         "distribution": distribution,
         "boxplot_data": boxplot_data,
+        "density_data": density_data,
+        "cumulative_data": cumulative_data,
+        "scatter_data": scatter_data,
     }
 
 
