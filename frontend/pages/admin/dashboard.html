@@ -23,8 +23,8 @@
 
 <script>if(!requireAdmin()){}
 renderNavbar("admin");applyI18n();
-function exportCSV(){window.open("/api/export/csv","_blank");showToast(t("admin.export_toast"),"info");}
-function exportXLSX(){window.open("/api/export/xlsx","_blank");showToast(t("admin.export_toast"),"info");}
+function exportCSV(){window.open("/api/export/csv?token="+encodeURIComponent(getToken()),"_blank");showToast(t("admin.export_toast"),"info");}
+function exportXLSX(){window.open("/api/export/xlsx?token="+encodeURIComponent(getToken()),"_blank");showToast(t("admin.export_toast"),"info");}
 function showPasswordModal(){document.getElementById("passwordModal").style.display="flex";}
 function hidePasswordModal(){document.getElementById("passwordModal").style.display="none";}
 document.getElementById("passwordForm").addEventListener("submit",async(e)=>{e.preventDefault();const op=document.getElementById("oldPassword").value,np=document.getElementById("newPassword").value,cp=document.getElementById("confirmNewPassword").value,err=document.getElementById("pwdError");if(np!==cp){err.textContent=t("admin.pwd_mismatch");err.style.display="block";return;}try{err.style.display="none";await apiPost("/auth/change-password",{old_password:op,new_password:np});hidePasswordModal();showToast(t("admin.pwd_changed"),"success");document.getElementById("passwordForm").reset();}catch(ex){err.textContent=ex.message;err.style.display="block";}});
