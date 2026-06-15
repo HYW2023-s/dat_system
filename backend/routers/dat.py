@@ -41,6 +41,7 @@ class DatResultResponse(BaseModel):
 # --- Routes ---
 
 @router.get("/test-config")
+@router.get("/test")  # Alias
 async def get_test_config(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),

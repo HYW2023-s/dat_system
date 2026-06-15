@@ -213,6 +213,16 @@ async def search_records(
     ]
 
 
+@router.get("/export")
+async def export_data(
+    admin: User = Depends(get_admin_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Export all DAT records (alias: redirect to CSV export)."""
+    from backend.routers.export import export_csv
+    return await export_csv(admin, db)
+
+
 @router.get("/users")
 async def list_users(
     admin: User = Depends(get_admin_user),
