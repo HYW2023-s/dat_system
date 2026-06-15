@@ -9,22 +9,29 @@ import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 import numpy as np
 
-from backend.config import STATIC_DIR, FONT_PATH
+from backend.config import STATIC_DIR
 
 logger = logging.getLogger(__name__)
 
 matplotlib.use("Agg")
 
-# Chinese font setup
-_font_candidates = ["STHeiti", "Heiti TC", "PingFang HK", "Lantinghei SC", "Songti SC", "STFangsong"]
-font_path = Path(FONT_PATH)
-if font_path.exists():
-    try:
-        fm.fontManager.addfont(str(font_path))
-    except Exception:
-        pass
+# Auto-detect Chinese font from system
+_font_candidates = [
+    "PingFang SC", "Heiti SC", "STHeiti", "Heiti TC",
+    "PingFang HK", "Lantinghei SC", "Microsoft YaHei",
+    "Noto Sans CJK SC", "WenQuanYi Micro Hei", "SimHei",
+    "Songti SC", "STFangsong", "Arial Unicode MS",
+]
 
-plt.rcParams["font.sans-serif"] = _font_candidates
+# Find first available font
+_available = set(f.name for f in fm.fontManager.ttflist)
+_detected = [f for f in _font_candidates if f in _available]
+if _detected:
+    plt.rcParams["font.sans-serif"] = _detected
+    logger.info(f"Using Chinese fonts: {_detected[:3]}")
+else:
+    plt.rcParams["font.sans-serif"] = _font_candidates
+    logger.warning("No Chinese font detected, heatmap may show tofu")
 plt.rcParams["axes.unicode_minus"] = False
 
 
