@@ -56,7 +56,6 @@
   B("login.logging_in", "登录中...", "Logging in...");
   B("login.no_account", "没有账号？", "No account? ");
   B("login.register_link", "注册新账号", "Register");
-  B("login.default_hint", "默认管理员 admin / 123456", "Default admin: admin / 123456");
   B("login.error_empty", "请输入用户名和密码", "Please enter username and password");
   B("login.error_failed", "登录失败，请检查用户名和密码", "Login failed. Check username and password");
   B("login.paper_citation",
