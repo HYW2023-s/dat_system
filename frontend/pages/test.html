@@ -41,11 +41,21 @@
 
     <!-- Test -->
     <div id="testArea" style="display:none;max-width:640px;margin:0 auto">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
         <h1 style="font-size:1.25rem">请输入 10 个互不相关的名词</h1>
         <div style="text-align:right">
           <div class="text-sm text-muted">剩余时间</div>
           <div id="timer" class="timer"></div>
+        </div>
+      </div>
+
+      <!-- Rules card -->
+      <div class="card" style="margin-bottom:1.25rem;padding:1rem">
+        <div style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.8125rem;color:var(--text-secondary);line-height:1.6">
+          <i class="ph ph-info" style="color:var(--accent);flex-shrink:0;margin-top:0.125rem"></i>
+          <div>
+            <span>词汇<strong>差异越大</strong>得分越高。必须输入<strong>名词</strong>，不填动词或形容词。至少 <strong>5个有效词</strong> 可生成热力图。</span>
+          </div>
         </div>
       </div>
 
